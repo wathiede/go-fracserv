@@ -13,9 +13,11 @@ Should print the URL of homepage, i.e. http://computer.example.com:9999/
 
 ###Package `fractal`
 Should define an interface that is a composition of `image.RGBA` something like  
+
     type Fractal struct {
     	image.Paletted
     }
+
 Subpackage `solid` which renders a fractal image of the specified size, using only a specific color  
 Create at least one other package that implements a famous fractal  
 Write at least one unit test to verify your `func At(x, y, int) color.Color`  
