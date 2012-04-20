@@ -7,9 +7,10 @@ Requirements
 ------------
 
 * Package `main`
-Should run a webserver
-Should take a commandline flag to set the port to listen on
-Should print the URL of homepage, i.e. http://computer.example.com:9999/
+
+Should run a webserver  
+Should take a commandline flag to set the port to listen on  
+Should print the URL of homepage, i.e. http://computer.example.com:9999/  
 
 * Package `fractal`
 Should define an interface that is a composition of `image.RGBA` something like
