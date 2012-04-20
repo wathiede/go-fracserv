@@ -1,7 +1,8 @@
 go.fracserv
 ===========
 
-Homework assignment for the greatest group ever
+Homework assignment for the greatest group ever.  This task is to create a web
+server that will generate fractals on the fly.
 
 Requirements
 ------------
@@ -18,10 +19,10 @@ Should define an interface that is a composition of `image.RGBA` something like
     	image.Paletted
     }
 
-Subpackage `solid` which renders a fractal image of the specified size, using only a specific color (this should make a good place holder for the other tasks if you don't want to go crazy learning about fractals)  
-Create at least one other package that implements a famous fractal  
+Subpackage `fractal/solid` which renders a fractal image of the specified size, using only a specific color (this should make a good place holder for the other tasks if you don't want to go crazy learning about fractals)  
+Create at least one other subpackage that implements a famous fractal  
 Write at least one unit test to verify your `func At(x, y, int) color.Color`  
-Subpackages should register themselves with `fractal` like the image encoders do  
+Subpackages should register themselves with `fractal` like the image encoders do.  This should provide a single API for calling generating any fractal type  
 Develop a common framework for any fractal type, that makes adding new fractals easy
 
 ###Homepage
@@ -38,9 +39,9 @@ Using `pprof` what are your three most expensive functions when rendering the fr
 Use multiple go routines to render individual parts of the fractal at the same time  
 Set the go runtime to use the number the same number of threads as your computer has cores at runtime automatically  
 Expose an option to limit the iterations of the fractal to speed up rendering at the expense of image quality  
-Implement an 'X last cool fractals' feature that allows you to 'bookmark' cool parameters and highlight them on the homepage
-Provide a 'send via email' feature that sends a link to the currently viewed fractal
-Double bonus points if the image is attached to the email instead of just a link
+Implement an 'X last cool fractals' feature that allows you to 'bookmark' cool parameters and highlight them on the homepage  
+Provide a 'send via email' feature that sends a link to the currently viewed fractal  
+Double bonus points if the image is attached to the email instead of just a link  
 
 
 Modules Used
