@@ -35,26 +35,14 @@ Bonus Points
 
 Modules Used
 ------------
-[1]
-[2]
-[3]
-[4]
-[5]
-[6]
-[7]
-[8]
-[9]
-[10]
-[11]
-
-  [1]: http://golang.org/pkg/flag               flag
-  [2]: http://golang.org/pkg/image              image
-  [3]: http://golang.org/pkg/image/jpeg         image/jpeg
-  [4]: http://golang.org/pkg/image/png          image/png
-  [5]: http://golang.org/pkg/net/http           net/http
-  [6]: http://golang.org/pkg/html/template      html/template
-  [7]: http://golang.org/pkg/net/http/pprof     net/http/pprof
-  [8]: http://golang.org/pkg/net/url            net/url
-  [9]: http://golang.org/pkg/runtime            runtime
-  [10]: http://golang.org/pkg/runtime/pprof      runtime/pprof
-  [11]: http://golang.org/pkg/testing            testing
+* <http://golang.org/pkg/flag>
+* <http://golang.org/pkg/image>
+* <http://golang.org/pkg/image/jpeg>
+* <http://golang.org/pkg/image/png>
+* <http://golang.org/pkg/net/http>
+* <http://golang.org/pkg/html/template>
+* <http://golang.org/pkg/net/http/pprof>
+* <http://golang.org/pkg/net/url>
+* <http://golang.org/pkg/runtime>
+* <http://golang.org/pkg/runtime/pprof>
+* <http://golang.org/pkg/testing>
