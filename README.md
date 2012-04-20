@@ -42,6 +42,7 @@ Expose an option to limit the iterations of the fractal to speed up rendering at
 Implement an 'X last cool fractals' feature that allows you to 'bookmark' cool parameters and highlight them on the homepage  
 Provide a 'send via email' feature that sends a link to the currently viewed fractal  
 Double bonus points if the image is attached to the email instead of just a link  
+Make your app `go get` compatible
 
 
 Modules Used
