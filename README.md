@@ -54,11 +54,11 @@ Modules Used
 * <http://golang.org/pkg/net/http>
 * <http://golang.org/pkg/html/template>
 * <http://golang.org/pkg/net/url>
-* <http://golang.org/pkg/runtime>
 * <http://golang.org/pkg/testing>
 
 *Optionally*
 * <http://golang.org/pkg/mime/multipart/>
 * <http://golang.org/pkg/net/http/pprof>
 * <http://golang.org/pkg/net/smtp/>
+* <http://golang.org/pkg/runtime>
 * <http://golang.org/pkg/runtime/pprof>
