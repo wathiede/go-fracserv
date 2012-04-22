@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
-	//"net/http"
+	"net/http"
 )
 
 var port string
@@ -21,4 +22,13 @@ func main() {
 		log.Fatalf("Failed to get hostname from os: %s\n", err)
 	}
 	fmt.Printf("  http://%s:%s/\n", host, port)
+
+	http.HandleFunc("/", IndexServer)
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
+
+// hello world, the web server
+func IndexServer(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, "hello, world!\n")
+}
+
