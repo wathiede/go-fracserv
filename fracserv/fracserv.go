@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
+	"html/template"
 	"log"
-	"os"
 	"net/http"
+	"os"
+	//"path/filepath"
 )
 
 var port string
@@ -19,16 +20,34 @@ func main() {
 	fmt.Printf("Listening on:\n")
 	host, err := os.Hostname()
 	if err != nil {
-		log.Fatalf("Failed to get hostname from os: %s\n", err)
+		log.Fatal("Failed to get hostname from os:", err)
 	}
 	fmt.Printf("  http://%s:%s/\n", host, port)
 
+	s := "static/"
+	_, err = os.Open(s)
+	if os.IsNotExist(err) {
+		log.Fatalf("Directory %s not found, please run for directory containing %s\n", s, s)
+	}
+
+	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	http.HandleFunc("/", IndexServer)
 	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
-// hello world, the web server
 func IndexServer(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "hello, world!\n")
-}
+	fracType := req.URL.Path[1:]
+	if fracType != "" {
+		log.Println("Found fractal type", fracType)
+	}
 
+	t, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
