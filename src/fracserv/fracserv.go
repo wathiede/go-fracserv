@@ -35,7 +35,7 @@ func main() {
 
 	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	http.HandleFunc("/", IndexServer)
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func IndexServer(w http.ResponseWriter, req *http.Request) {
