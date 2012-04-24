@@ -12,7 +12,7 @@ func TestColor(t *testing.T) {
 		url.Values{
 			"w": []string{"10"},
 			"h": []string{"10"},
-			"c": []string{"#224488"},
+			"c": []string{"224488"},
 			//color.RGBA{10, 20, 30, 40}
 		},
 	}
@@ -42,7 +42,7 @@ func TestDimension(t *testing.T) {
 		url.Values{
 			"w": []string{"10"},
 			"h": []string{"10"},
-			"c": []string{"#224488"},
+			"c": []string{"224488"},
 		},
 	}
 	s, err := NewSolid(o)
