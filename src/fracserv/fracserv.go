@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"fractal"
 	"fractal/solid"
 	"html/template"
-	"image"
-	"image/color"
 	"image/png"
 	"log"
 	"net/http"
@@ -43,10 +42,14 @@ func IndexServer(w http.ResponseWriter, req *http.Request) {
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
 		log.Println("Found fractal type", fracType)
-		o := solid.Options{
-			image.Config{color.RGBAModel, 10, 10},
-			color.RGBA{10, 20, 30, 40}}
-		i := solid.NewSolid(o)
+		o := fractal.Options{
+			req.URL.Query(),
+		}
+		i, err := solid.NewSolid(o)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		png.Encode(w, i)
 		return
 	}

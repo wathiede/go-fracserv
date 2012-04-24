@@ -1,7 +1,11 @@
 package fractal
 
-import "image"
+import (
+	"image"
+	"net/url"
+)
 
-type Fractal struct {
-	image.Image
+type Options struct {
+	url.Values
 }
+type Fractal image.Image
