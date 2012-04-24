@@ -35,22 +35,44 @@ func main() {
 
 	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	http.HandleFunc("/", IndexServer)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":" + port, nil))
+}
+
+func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+	t, err := template.ParseFiles(fmt.Sprintf("templates/%s.html", fracType))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
+	factory := map[string]func(o fractal.Options) (fractal.Fractal, error){
+		"solid": solid.NewSolid,
+	}
+
+	i, err := factory[fracType](fractal.Options{req.URL.Query()})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	png.Encode(w, i)
 }
 
 func IndexServer(w http.ResponseWriter, req *http.Request) {
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
 		log.Println("Found fractal type", fracType)
-		o := fractal.Options{
-			req.URL.Query(),
+
+		if len(req.URL.Query()) != 0 {
+			drawFractalPage(w, req, fracType)
+		} else {
+			drawFractal(w, req, fracType)
 		}
-		i, err := solid.NewSolid(o)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		png.Encode(w, i)
 		return
 	}
 
