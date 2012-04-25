@@ -8,4 +8,7 @@ import (
 type Options struct {
 	url.Values
 }
-type Fractal image.Image
+type Fractal interface {
+	image.Image
+	Ratio() float32
+}

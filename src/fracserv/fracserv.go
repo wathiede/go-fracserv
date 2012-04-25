@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"fractal"
+	"fractal/mandelbrot"
 	"fractal/solid"
 	"html/template"
 	"image/png"
@@ -13,10 +14,16 @@ import (
 	//"path/filepath"
 )
 
+var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var port string
+
 
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
+	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
+		"solid": solid.NewFractal,
+		"mandelbrot": mandelbrot.NewFractal,
+	}
 }
 
 func main() {
@@ -51,10 +58,6 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 }
 
 func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
-	factory := map[string]func(o fractal.Options) (fractal.Fractal, error){
-		"solid": solid.NewSolid,
-	}
-
 	i, err := factory[fracType](fractal.Options{req.URL.Query()})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,7 +84,7 @@ func IndexServer(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, nil)
+	err = t.Execute(w, factory)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
