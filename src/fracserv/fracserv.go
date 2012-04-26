@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"fractal"
+	"fractal/lyapunov"
 	"fractal/mandelbrot"
 	"fractal/solid"
 	"html/template"
@@ -23,6 +24,7 @@ func init() {
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
 		"solid": solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
+		"lyapunov": lyapunov.NewFractal,
 	}
 }
 

@@ -20,7 +20,7 @@ String.prototype.capitalize = function() {
 				$('form').submit(function() {
 					$('body').css('background-image', 'url(/' + fracType + '?' + $(this).serialize() + ')');
 					return false;
-				});
+				}).submit();
 				return data;
 			});
 		};
@@ -39,6 +39,7 @@ String.prototype.capitalize = function() {
 			console.log(fracType);
 			getContents(fracType);
 			$('#masthead').fadeOut();
+			$('#config').fadeIn();
 			return false;
 		});
 	})
