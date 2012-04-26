@@ -5,12 +5,12 @@ import (
 	"fractal"
 	"image"
 	"image/color"
-	"math/rand"
 	"strconv"
 )
 
 type Mandelbrot struct {
 	*image.Paletted
+	maxIterations int
 }
 
 func NewFractal(o fractal.Options) (fractal.Fractal, error) {
@@ -18,17 +18,25 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse width %q: %s", o.Get("w"), err)
 	}
+
 	h, err := strconv.Atoi(o.Get("h"))
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse height %q: %s", o.Get("h"), err)
 	}
 
+	i, err := strconv.Atoi(o.Get("i"))
+	if err != nil {
+		return nil, fmt.Errorf("Failed to parse max iterations %q: %s", o.Get("i"), err)
+	}
+
 	p := color.Palette{}
-	for i := 0; i<256; i++ {
+	for idx := uint8(0); i<256; i++ {
 		p = append(p, color.RGBA{
-			uint8(rand.Int()) % 255,
-			uint8(rand.Int()) % 255,
-			uint8(rand.Int()) % 255, 255})
+			uint8(idx & 0x3),
+			uint8(idx >> 2 & 0x7),
+			uint8(idx >> 5 & 0x3),
+			0xff,
+		})
 	}
 
 	r := 3.5/2.0
@@ -37,7 +45,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	} else {
 		h = int(float64(w) / r)
 	}
-	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p)}, nil
+	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), i}, nil
 }
 
 //func (m *Mandelbrot) At(x, y int) color.Color {
@@ -56,10 +64,9 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 
 	var tx, ty float64
 
-	var iteration uint8 = 0
-	var max_iteration uint8 = 255
+	iteration := 0
 
-	for (tx*tx + ty*ty < 4)  && (iteration < max_iteration) {
+	for (tx*tx + ty*ty < 4)  && (iteration < m.maxIterations) {
 		xtemp := tx*tx - ty*ty + x0
 		ty = 2*tx*ty + y0
 
@@ -68,7 +75,7 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 		iteration++
 	}
 
-	return iteration
+	return uint8(iteration % 256)
 }
 
 func (m *Mandelbrot) Ratio() float32 {
