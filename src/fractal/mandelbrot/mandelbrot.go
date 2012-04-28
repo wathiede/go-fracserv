@@ -43,7 +43,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	x := o.GetIntDefault("x", 0)
 	y := o.GetIntDefault("y", 0)
 	it := o.GetIntDefault("i", 256)
-	z := o.GetIntDefault("z", 1)
+	z := o.GetIntDefault("z", 0)
 
 	p := color.Palette{color.Black}
 	numColors := float64(12)
@@ -53,7 +53,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	}
 
 	// Center the image by considering the fractal range of (-2.5, 1), (-1, 1)
-	nav := fractal.NewDefaultNavigator(float64(z)*200, x +
+	nav := fractal.NewDefaultNavigator(float64(z+1)*200, x +
 		int(-float64(w)/1.75), y - h/2)
 	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav}, nil
 }
