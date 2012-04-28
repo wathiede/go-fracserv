@@ -5,7 +5,6 @@ import (
 	"fractal"
 	"image"
 	"image/color"
-	"strconv"
 )
 
 type Solid struct {
@@ -21,21 +20,11 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 		return nil, fmt.Errorf("Failed to parse color %q: %s", c, err)
 	}
 
-	w, err := strconv.Atoi(o.Get("w"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse width %q: %s", o.Get("w"), err)
-	}
-	h, err := strconv.Atoi(o.Get("h"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse height %q: %s", o.Get("h"), err)
-	}
+	w := o.GetIntDefault("w", 256)
+	h := o.GetIntDefault("h", 256)
 
 	return &Solid{*image.NewUniform(color.RGBA{r, g, b, 0xff}),
 		image.Rect(0, 0, w, h)}, nil
-}
-
-func (s *Solid) Ratio() float32 {
-	return 1
 }
 
 func (s *Solid) Bounds() image.Rectangle {
