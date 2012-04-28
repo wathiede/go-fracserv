@@ -4,11 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"fractal"
+	//"fractal/debug"
 	"fractal/lyapunov"
 	"fractal/mandelbrot"
 	"fractal/solid"
 	"html/template"
 	"image/png"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -22,6 +24,7 @@ var port string
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
+		//"debug": debug.NewFractal,
 		"solid": solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
 		"lyapunov": lyapunov.NewFractal,
@@ -60,18 +63,38 @@ func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) 
 }
 
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
-	i, err := factory[fracType](fractal.Options{req.URL.Query()})
+	cachefn := "cache" + req.URL.RequestURI()
+	f, err := os.Open(cachefn)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		// No file, create one
+		i, err := factory[fracType](fractal.Options{req.URL.Query()})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
+		var mw io.Writer
+		if err != nil {
+			log.Printf("Failed to save tile: %s", err)
+			mw = io.MultiWriter(w)
+		} else {
+			defer f.Close()
+			mw = io.MultiWriter(w, f)
+		}
+
+		png.Encode(mw, i)
+	} else {
+		defer f.Close()
+		log.Printf("cache hit: %q", cachefn)
+		io.Copy(w, f)
 	}
-	png.Encode(w, i)
 }
 
 func IndexServer(w http.ResponseWriter, req *http.Request) {
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
-		log.Println("Found fractal type", fracType)
+		//log.Println("Found fractal type", fracType)
 
 		if len(req.URL.Query()) != 0 {
 			drawFractal(w, req, fracType)
