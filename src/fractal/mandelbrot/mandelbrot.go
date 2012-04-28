@@ -1,81 +1,98 @@
 package mandelbrot
 
 import (
-	"fmt"
 	"fractal"
 	"image"
 	"image/color"
-	"strconv"
+	"math"
+	"math/cmplx"
 )
 
 type Mandelbrot struct {
 	*image.Paletted
 	maxIterations int
+	fractal.DefaultNavigator
+}
+
+func HSVToRGBA(h, s, v float64) color.RGBA {
+	hi := int(math.Mod(math.Floor(h / 60), 6))
+	f := (h / 60) - math.Floor(h / 60)
+	p := v * (1 - s)
+	q := v * (1 - (f*s))
+	t := v * (1 - ((1 - f) * s))
+
+	RGB := func(r, g, b float64) color.RGBA {
+		return color.RGBA{uint8(r * 255), uint8(g * 255), uint8(b * 255), 255}
+	}
+
+	var c color.RGBA
+	switch hi {
+		case 0: c = RGB(v, t, p)
+		case 1: c = RGB(q, v, p)
+		case 2: c = RGB(p, v, t)
+		case 3: c = RGB(p, q, v)
+		case 4: c = RGB(t, p, v)
+		case 5: c = RGB(v, p, q)
+	}
+	return c
 }
 
 func NewFractal(o fractal.Options) (fractal.Fractal, error) {
-	w, err := strconv.Atoi(o.Get("w"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse width %q: %s", o.Get("w"), err)
-	}
-	h, err := strconv.Atoi(o.Get("h"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse height %q: %s", o.Get("h"), err)
+	w := o.GetIntDefault("w", 256)
+	h := o.GetIntDefault("h", 256)
+	x := o.GetIntDefault("x", 0)
+	y := o.GetIntDefault("y", 0)
+	it := o.GetIntDefault("i", 256)
+	z := o.GetIntDefault("z", 1)
+
+	p := color.Palette{color.Black}
+	numColors := float64(12)
+	for i := float64(0); i<numColors; i += 1 {
+		degree := i/numColors * 360
+		p = append(p, HSVToRGBA(degree, 1, 1))
 	}
 
-	it, err := strconv.Atoi(o.Get("i"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse height %q: %s", o.Get("i"), err)
-	}
-
-	p := color.Palette{}
-	for i := 0; i<256; i++ {
-		p = append(p, color.RGBA{
-			uint8((i & 0x3) << 6),
-			uint8((i >> 2 & 0x7) << 5),
-			uint8((i >> 5 & 0x3) << 6),
-			0xff,
-		})
-	}
-
-	r := 3.5/2.0
-	if float64(w) / r > float64(h) {
-		w = int(float64(h) * r)
-	} else {
-		h = int(float64(w) / r)
-	}
-	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), it}, nil
+	// Center the image by considering the fractal range of (-2.5, 1), (-1, 1)
+	nav := fractal.NewDefaultNavigator(float64(z)*200, x +
+		int(-float64(w)/1.75), y - h/2)
+	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav}, nil
 }
 
 //func (m *Mandelbrot) At(x, y int) color.Color {
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
-	b := m.Bounds()
 	/*
-	Normalize pixel (x,y) in range:
-	x0 := (-2.5 to 1)
-	y0 := (-1, 1)
+	For every point (x,y) in your view rectangle 
+	  Let z=x+yi
+	  Set n=0
+	  Set w=0
+	  While(n less than limit and |w|<2)
+		Let w=w*w+z
+		Increment n
+	  End While
+	  if(|w|<2) then z is a member of the approximate 
+		Mandelbrot set, plot (x,y) in the Mandelbrot set color
+	  otherwise z is outside the Mandelbrot set, 
+		plot (x,y) in the outside color.
+	End for
 	*/
-	w := b.Dx()
-	h := b.Dy()
+	r, i := m.Transform(image.Pt(x, y))
+	z := complex(r, i)
+	w := complex(0, 0)
+	it := 0
+	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
+		w = w * w + z
 
-	x0 := (float64(x) / float64(w) * 3.5) - 2.5
-	y0 := (float64(y) / float64(h) * 2) - 1
-
-	var tx, ty float64
-
-	iteration := 0
-	for (tx*tx + ty*ty < 4)  && (iteration < m.maxIterations) {
-		xtemp := tx*tx - ty*ty + x0
-		ty = 2*tx*ty + y0
-
-		tx = xtemp
-
-		iteration++
+		it++
+		// Black stored at m.Palette[0], so skip it
+		if it % len(m.Palette) == 0 {
+			it++
+		}
 	}
 
-	return uint8(iteration % 256)
-}
+	if cmplx.Abs(w) < 2 {
+		// Pixel in mandelbrot set, return black
+		return 0
+	}
 
-func (m *Mandelbrot) Ratio() float32 {
-	return 3.5/2.0
+	return uint8(it % len(m.Palette))
 }
