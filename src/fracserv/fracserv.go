@@ -47,7 +47,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
-func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
 	t, err := template.ParseFiles(fmt.Sprintf("templates/%s.html", fracType))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	}
 }
 
-func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
+func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	i, err := factory[fracType](fractal.Options{req.URL.Query()})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,9 +74,9 @@ func IndexServer(w http.ResponseWriter, req *http.Request) {
 		log.Println("Found fractal type", fracType)
 
 		if len(req.URL.Query()) != 0 {
-			drawFractalPage(w, req, fracType)
-		} else {
 			drawFractal(w, req, fracType)
+		} else {
+			drawFractalPage(w, req, fracType)
 		}
 		return
 	}
