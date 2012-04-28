@@ -5,6 +5,7 @@ String.prototype.capitalize = function() {
 !function( $ ) {
 	$(function () {
 		"use strict"
+		/*
 		var pop = $('#config');
 		var getContents = function(fracType) {
 			$.get('/' + fracType, function(data) {
@@ -33,6 +34,21 @@ String.prototype.capitalize = function() {
 		pop.click(function() {
 			pop.popover('toggle');
 		});
+		*/
+		var getContents = function(fracType) {
+			$('#config').load('/' + fracType + ' form', function() {
+				var form = $('#config form');
+
+				$('#w', form).val($(window).width());
+				$('#h', form).val($(window).height());
+				form.submit(function() {
+					console.log("Form submitted");
+					$('body').css('background-image',
+						'url(/' + fracType + '?' + form.serialize() + ')');
+						return false;
+						}).submit();
+					});
+		};
 
 		$('ul.nav li a').click(function(e) {
 			var fracType = $(this).attr('id');
