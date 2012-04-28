@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"fractal"
-	//"fractal/debug"
+	"fractal/debug"
 	"fractal/lyapunov"
 	"fractal/mandelbrot"
 	"fractal/solid"
@@ -24,7 +24,7 @@ var port string
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
-		//"debug": debug.NewFractal,
+		"debug": debug.NewFractal,
 		"solid": solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
 		"lyapunov": lyapunov.NewFractal,
