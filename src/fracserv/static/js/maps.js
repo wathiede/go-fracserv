@@ -6,7 +6,7 @@ var getUrlVars = function() {
 	return vars;
 }
 
-var size = 256;
+var size = 128;
 var serializeArray = function(arr) {
 	var out = new Array();
 
@@ -17,6 +17,7 @@ var serializeArray = function(arr) {
 	return out.join('&');
 };
 
+var zoomOut; // Placeholder for setTimeout callback
 function initialize(mapTypeName) {
 	var customTypeOptions = {
 		getTileUrl: function(coord, zoom) {
@@ -25,8 +26,7 @@ function initialize(mapTypeName) {
 				h: size,
 				x: coord.x,
 				y: coord.y,
-				z: zoom,
-				i: 10,
+				z: Math.floor(zoom),
 			}
 			// Add any form elements to request
 			$('form input').each(function(idx, e) {
@@ -46,7 +46,10 @@ function initialize(mapTypeName) {
 		zoom: 0,
 		streetViewControl: false,
 		mapTypeControlOptions: {
-			mapTypeIds: [mapTypeName]
+			mapTypeIds: []
+		},
+		zoomControlOptions: {
+			style: google.maps.ZoomControlStyle.SMALL
 		}
 	};
 
@@ -54,5 +57,12 @@ function initialize(mapTypeName) {
 	map.mapTypes.set(mapTypeName, customMapType);
 	map.setMapTypeId(mapTypeName);
 	map.panTo(myLatlng);
+	map.reload = function() {
+		map.setZoom(map.getZoom() + 0.00001);
+		zoomOut = function() {
+			map.setZoom(map.getZoom() - 0.00001)
+		};
+		setTimeout("zoomOut()", 1);
+	};
 	return map;
 }

@@ -9,17 +9,25 @@ String.prototype.capitalize = function() {
 			$('#config').load('/' + fracType + ' form', function() {
 				var form = $('#config form');
 
-				$('#maps').width($(window).width())
-				          .height($(window).height());
 				var map = initialize(fracType);
-				$('input', form).change(function() {
+				$('input', form).bind('input', function() {
 					console.log("Form changed, redrawing");
-					var z = map.getZoom();
-					map.setZoom(z + 1);
-					map.setZoom(z);
+					map.reload();
 				});
+
+				var resize = function() {
+					$('#maps').width($(window).width())
+							  .height($(window).height());
+				}
+				resize();
 				$(window).resize(function() {
+					resize();
 					google.maps.event.trigger(map, 'resize')
+				});
+				form.submit(function() {
+					console.log("Form submitted");
+					map.reload();
+					return false;
 				});
 			});
 		};
