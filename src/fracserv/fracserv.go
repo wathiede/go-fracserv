@@ -9,7 +9,6 @@ import (
 	"fractal/solid"
 	"html/template"
 	"image/png"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -80,7 +79,7 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 		log.Printf("Creating cache dir for %q", d)
 		err = os.Mkdir(d, 0700)
 	}
-	f, err := os.Open(cachefn)
+	_, err := os.Stat(cachefn)
 	if err != nil {
 		// No file, create one
 		i, err := factory[fracType](fractal.Options{req.URL.Query()})
@@ -89,25 +88,22 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 			return
 		}
 
-		f, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
-		var mw io.Writer
+		outf, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Printf("Failed to save tile: %s", err)
-			mw = io.MultiWriter(w)
-		} else {
-			defer f.Close()
-			mw = io.MultiWriter(w, f)
+			log.Printf("Failed to open tile for save: %s", err)
+			// Just send png from memory
+			png.Encode(w, i)
+			return
 		}
-		// Write file to possibly multiple locations
-		png.Encode(mw, i)
-	} else {
-		defer f.Close()
-		// TODO(wathiede): log cache hits as expvar
-
-		// Using this instead of io.Copy, sets Last-Modified which helps given
-		// the way the maps API makes lots of re-requests
-		http.ServeFile(w, req, cachefn)
+		// Save to disk and serve below with http.ServeFile
+		png.Encode(outf, i)
+		outf.Close()
 	}
+	// TODO(wathiede): log cache hits as expvar
+
+	// Using this instead of io.Copy, sets Last-Modified which helps given
+	// the way the maps API makes lots of re-requests
+	http.ServeFile(w, req, cachefn)
 }
 
 func IndexServer(w http.ResponseWriter, req *http.Request) {
