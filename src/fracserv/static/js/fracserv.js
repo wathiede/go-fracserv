@@ -8,12 +8,21 @@ String.prototype.capitalize = function() {
 		var getContents = function(fracType) {
 			$('#config').load('/' + fracType + ' form', function() {
 				var form = $('#config form');
-
 				var map = initialize(fracType);
-				$('input', form).bind('input', function() {
-					console.log("Form changed, redrawing");
-					map.reload();
-				});
+				var emptyForm = $('input', form).length == 0;
+				$('#config').toggle(!emptyForm);
+				if(!emptyForm) {
+					$('input', form).bind('input', function() {
+						console.log("Form changed, redrawing");
+						map.reload();
+					});
+
+					form.submit(function() {
+						console.log("Form submitted");
+						map.reload();
+						return false;
+					});
+				}
 
 				var resize = function() {
 					$('#maps').width($(window).width())
@@ -23,11 +32,6 @@ String.prototype.capitalize = function() {
 				$(window).resize(function() {
 					resize();
 					google.maps.event.trigger(map, 'resize')
-				});
-				form.submit(function() {
-					console.log("Form submitted");
-					map.reload();
-					return false;
 				});
 			});
 		};
