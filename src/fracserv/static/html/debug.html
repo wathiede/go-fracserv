@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Google Maps JavaScript API v3 Example: Image MapTypes</title>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script>
+	var getUrlVars = function() {
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+			vars[key] = value;
+		});
+		return vars;
+	}
+
+	var mapTypeName = getUrlVars()["type"] || "debug";
+	var serializeArray = function(arr) {
+		var out = new Array();
+
+		for (key in arr) {
+			out.push(key + '=' + arr[key]);
+		}
+
+		return out.join('&');
+	};
+	var size = 256;
+	var customTypeOptions = {
+		getTileUrl: function(coord, zoom) {
+			console.log("Fetching: " + coord + " zoom " + zoom);
+			options = {
+				w: size,
+				h: size,
+				x: coord.x,
+				y: coord.y,
+				z: zoom,
+				i: 10,
+			}
+			return "/" + mapTypeName + "?" + serializeArray(options);
+		},
+		tileSize: new google.maps.Size(size, size),
+		maxZoom: 100,
+		minZoom: 0,
+		name: mapTypeName
+	};
+
+  var customMapType = new google.maps.ImageMapType(customTypeOptions);
+
+  function initialize() {
+    var myLatlng = new google.maps.LatLng(0, 0);
+    var myOptions = {
+      center: myLatlng,
+      zoom: 0,
+      streetViewControl: false,
+      mapTypeControlOptions: {
+        mapTypeIds: [mapTypeName]
+      }
+    };
+
+    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    map.mapTypes.set(mapTypeName, customMapType);
+    map.setMapTypeId(mapTypeName);
+  }
+  </script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas" style="width: 100%; height: 880px;"></div>
+</body>
+</html>

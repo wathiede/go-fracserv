@@ -5,49 +5,23 @@ String.prototype.capitalize = function() {
 !function( $ ) {
 	$(function () {
 		"use strict"
-		/*
-		var pop = $('#config');
-		var getContents = function(fracType) {
-			$.get('/' + fracType, function(data) {
-				pop.attr('data-content', data);
-				pop.attr('title', fracType.capitalize());
-
-				pop.popover('show');
-
-				$('form #w').val($(window).width());
-				$('form #h').val($(window).height());
-
-
-				$('form').submit(function() {
-					$('body').css('background-image', 'url(/' + fracType + '?' + $(this).serialize() + ')');
-					return false;
-				}).submit();
-				return data;
-			});
-		};
-
-		pop.popover({
-			placement: 'top',
-			trigger: 'manual',
-		});
-
-		pop.click(function() {
-			pop.popover('toggle');
-		});
-		*/
 		var getContents = function(fracType) {
 			$('#config').load('/' + fracType + ' form', function() {
 				var form = $('#config form');
 
-				$('#w', form).val($(window).width());
-				$('#h', form).val($(window).height());
-				form.submit(function() {
-					console.log("Form submitted");
-					$('body').css('background-image',
-						'url(/' + fracType + '?' + form.serialize() + ')');
-						return false;
-						}).submit();
-					});
+				$('#maps').width($(window).width())
+				          .height($(window).height());
+				var map = initialize(fracType);
+				$('input', form).change(function() {
+					console.log("Form changed, redrawing");
+					var z = map.getZoom();
+					map.setZoom(z + 1);
+					map.setZoom(z);
+				});
+				$(window).resize(function() {
+					google.maps.event.trigger(map, 'resize')
+				});
+			});
 		};
 
 		$('ul.nav li a').click(function(e) {

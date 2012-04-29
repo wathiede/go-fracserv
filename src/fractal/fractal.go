@@ -48,10 +48,18 @@ func (n *DefaultNavigator) Transform(p image.Point) (float64, float64) {
 	return float64(o.X) / n.z, float64(o.Y) / n.z
 }
 
+func (n *DefaultNavigator) GetTranslate() image.Point {
+	return n.offset
+}
+
 func (n *DefaultNavigator) Translate(offset image.Point) {
 	n.offset = offset
 }
 
 func (n *DefaultNavigator) Zoom(z float64) {
 	n.z = z
+}
+
+func (n *DefaultNavigator) GetZoom() float64 {
+	return n.z
 }

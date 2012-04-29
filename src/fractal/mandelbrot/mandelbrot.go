@@ -53,8 +53,13 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	}
 
 	// Center the image by considering the fractal range of (-2.5, 1), (-1, 1)
-	nav := fractal.NewDefaultNavigator(float64(z+1)*200, x +
-		int(-float64(w)/1.75), y - h/2)
+	// Explanation of magic numbers 1 and 7 being added to z
+	//   +1: Google maps JS sends us zero based zoom so  we add one here to
+	//       work with our math
+	//   +7: The zoom factor is converted to 2^z, so having a zoom factor of 7
+	//       (128x) makes the fractal range comfortably visible in pixel space
+	nav := fractal.NewDefaultNavigator(float64(z+1+6), x, y)
+	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
 	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav}, nil
 }
 
@@ -95,4 +100,13 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	}
 
 	return uint8(it % len(m.Palette))
+}
+
+func (m *Mandelbrot) Transform(p image.Point) (float64, float64) {
+	b := m.Bounds()
+	t := m.GetTranslate()
+	x := p.X + (t.X * b.Dx())
+	y := p.Y + (t.Y * b.Dy())
+	z := math.Pow(2, m.GetZoom())
+	return float64(x)/z, float64(y)/z
 }
