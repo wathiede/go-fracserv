@@ -48,7 +48,8 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	r, i := m.Transform(image.Pt(x, y))
 	z := complex(r, i)
 	w := complex(0, 0)
-	it := 0
+	// Start at -1 so the first escaped values get the first color.
+	it := -1
 	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
 		v := w
 		for i := 1; i<m.order; i++ {
@@ -57,10 +58,6 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 		w = v + z
 
 		it++
-		// Black stored at m.Palette[0], so skip it
-		if it % len(m.Palette) == 0 {
-			it++
-		}
 	}
 
 	if cmplx.Abs(w) < 2 {
@@ -68,5 +65,6 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 		return 0
 	}
 
-	return uint8(it % len(m.Palette))
+	// Black stored at m.Palette[0], so skip it
+	return 1 + uint8(it % (len(m.Palette)-1))
 }
