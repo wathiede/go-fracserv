@@ -53,5 +53,6 @@ function initialize(mapTypeName) {
 	var map = new google.maps.Map(document.getElementById("maps"), myOptions);
 	map.mapTypes.set(mapTypeName, customMapType);
 	map.setMapTypeId(mapTypeName);
+	map.panTo(myLatlng);
 	return map;
 }
