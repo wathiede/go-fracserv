@@ -1,3 +1,5 @@
+// Implementes Mandelbrot set, see:
+//   http://eldar.mathstat.uoguelph.ca/dashlock/ftax/Mandel.html
 package mandelbrot
 
 import (
@@ -65,21 +67,6 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 
 //func (m *Mandelbrot) At(x, y int) color.Color {
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
-	/*
-	For every point (x,y) in your view rectangle 
-	  Let z=x+yi
-	  Set n=0
-	  Set w=0
-	  While(n less than limit and |w|<2)
-		Let w=w*w+z
-		Increment n
-	  End While
-	  if(|w|<2) then z is a member of the approximate 
-		Mandelbrot set, plot (x,y) in the Mandelbrot set color
-	  otherwise z is outside the Mandelbrot set, 
-		plot (x,y) in the outside color.
-	End for
-	*/
 	r, i := m.Transform(image.Pt(x, y))
 	z := complex(r, i)
 	w := complex(0, 0)
