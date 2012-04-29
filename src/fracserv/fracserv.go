@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"fractal"
 	"fractal/debug"
-	"fractal/lyapunov"
 	"fractal/mandelbrot"
 	"fractal/solid"
 	"html/template"
@@ -14,20 +13,23 @@ import (
 	"log"
 	"net/http"
 	"os"
-	//"path/filepath"
+	"strings"
+	"path"
 )
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var port string
-
+var cacheDir string
 
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
+	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
+		"directory to store rendered tiles. Directory must exist")
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
 		"debug": debug.NewFractal,
 		"solid": solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
-		"lyapunov": lyapunov.NewFractal,
+		//"lyapunov": lyapunov.NewFractal,
 	}
 }
 
@@ -63,7 +65,21 @@ func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) 
 }
 
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
-	cachefn := "cache" + req.URL.RequestURI()
+	cleanup := func(r rune) rune {
+		switch r {
+		case '?':
+			return '/'
+		case '&':
+			return ','
+		}
+		return r
+	}
+	cachefn := cacheDir + strings.Map(cleanup, req.URL.RequestURI())
+	d := path.Dir(cachefn)
+	if _, err := os.Stat(d); err != nil {
+		log.Printf("Creating cache dir for %q", d)
+		err = os.Mkdir(d, 0700)
+	}
 	f, err := os.Open(cachefn)
 	if err != nil {
 		// No file, create one
@@ -82,12 +98,15 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 			defer f.Close()
 			mw = io.MultiWriter(w, f)
 		}
-
+		// Write file to possibly multiple locations
 		png.Encode(mw, i)
 	} else {
 		defer f.Close()
-		log.Printf("cache hit: %q", cachefn)
-		io.Copy(w, f)
+		// TODO(wathiede): log cache hits as expvar
+
+		// Using this instead of io.Copy, sets Last-Modified which helps given
+		// the way the maps API makes lots of re-requests
+		http.ServeFile(w, req, cachefn)
 	}
 }
 
