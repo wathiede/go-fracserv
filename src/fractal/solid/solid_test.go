@@ -16,9 +16,9 @@ func TestColor(t *testing.T) {
 			//color.RGBA{10, 20, 30, 40}
 		},
 	}
-	s, err := NewSolid(o)
+	s, err := NewFractal(o)
 	if err != nil {
-		t.Errorf("Failed to create NewSolid: %s", err)
+		t.Errorf("Failed to create NewFractal: %s", err)
 	}
 
 	c := s.At(5, 5)
@@ -45,9 +45,9 @@ func TestDimension(t *testing.T) {
 			"c": []string{"224488"},
 		},
 	}
-	s, err := NewSolid(o)
+	s, err := NewFractal(o)
 	if err != nil {
-		t.Errorf("Failed to create NewSolid: %s", err)
+		t.Errorf("Failed to create NewFractal: %s", err)
 	}
 
 	rect := image.Rect(0, 0, 10, 10)

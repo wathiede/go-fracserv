@@ -5,34 +5,36 @@ String.prototype.capitalize = function() {
 !function( $ ) {
 	$(function () {
 		"use strict"
-		var pop = $('#config');
 		var getContents = function(fracType) {
-			$.get('/' + fracType, function(data) {
-				pop.attr('data-content', data);
-				pop.attr('title', fracType.capitalize());
+			$('#config').load('/' + fracType + ' form', function() {
+				var form = $('#config form');
+				var map = initialize(fracType);
+				var emptyForm = $('input', form).length == 0;
+				$('#config').toggle(!emptyForm);
+				if(!emptyForm) {
+					$('input', form).bind('input', function() {
+						console.log("Form changed, redrawing");
+						map.reload();
+					});
 
-				pop.popover('show');
+					form.submit(function() {
+						console.log("Form submitted");
+						map.reload();
+						return false;
+					});
+				}
 
-				$('form #w').val($(window).width());
-				$('form #h').val($(window).height());
-
-
-				$('form').submit(function() {
-					$('body').css('background-image', 'url(/' + fracType + '?' + $(this).serialize() + ')');
-					return false;
-				}).submit();
-				return data;
+				var resize = function() {
+					$('#maps').width($(window).width())
+							  .height($(window).height());
+				}
+				resize();
+				$(window).resize(function() {
+					resize();
+					google.maps.event.trigger(map, 'resize')
+				});
 			});
 		};
-
-		pop.popover({
-			placement: 'top',
-			trigger: 'manual',
-		});
-
-		pop.click(function() {
-			pop.popover('toggle');
-		});
 
 		$('ul.nav li a').click(function(e) {
 			var fracType = $(this).attr('id');

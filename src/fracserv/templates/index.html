@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <div class="container">
+	<div class="container">
 		<div id="masthead" class="hero-unit">
 			<h1>Draw some fractals</h1>
 			<ol>
@@ -61,11 +61,12 @@
 				<li><em>Enjoy</em></li>
 			</ol>
 		</div>
-	  <img id="config"
-		  style="display:none;position:fixed;bottom:16px;left:50%"
-		  src="/static/img/glyphicons_019_cogwheel.png">
-
-    </div> <!-- /container -->
+		<div id="maps-outer" style="position:fixed;left:0;top:40px">
+			<div id="maps" style="width:100%;height:100%"></div>
+		</div>
+		<div id="config" class="well form-horizontal"
+			style="display:none;position:fixed;bottom:16px;right:16px"></div>
+	</div> <!-- /container -->
 </div>
 
     <!-- Le javascript
@@ -73,6 +74,8 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/bootstrap.js"></script>
-    <script src="/static/js/fracserv.js"></script>
+	<script src="/static/js/fracserv.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script src="/static/js/maps.js"></script>
   </body>
 </html>
