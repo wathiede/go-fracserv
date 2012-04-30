@@ -25,6 +25,8 @@ func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
 	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
 		"directory to store rendered tiles. Directory must exist")
+	flag.Parse()
+
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
 		"debug": debug.NewFractal,
 		"solid": solid.NewFractal,
