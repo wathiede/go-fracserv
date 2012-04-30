@@ -1,0 +1,17 @@
+<html>
+<body>
+<form>
+	<label for="mu_r">Mu (real):</label>
+	<input class="span1" id="mu_r" name="mu_r" value="0.36237">
+	<label for="mu_i">Mu (imag):</label>
+	<div class="input-append">
+		<input class="span1" id="mu_i" name="mu_i" value="0.32"><span class="add-on" style="font-style:italic">i</span>
+	</div>
+	<label for="method">
+		Method:
+		(1: z^2, 2: cosine)
+	</label>
+	<input class="span1" type="number" min="1" max="2" step="1" id="method" name="method" value="1">
+	<label for="i">Max Iterations:</label>
+	<input class="span1" type="number" min="0" max="1000" step="5" id="i" name="i" value="50">
+</form>
