@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"fractal"
 	"fractal/debug"
+	"fractal/julia"
 	"fractal/mandelbrot"
 	"fractal/solid"
 	"html/template"
@@ -28,6 +29,8 @@ func init() {
 		"debug": debug.NewFractal,
 		"solid": solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
+		"julia": julia.NewFractal,
+		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
 }
