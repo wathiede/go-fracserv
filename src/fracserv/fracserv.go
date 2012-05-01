@@ -57,7 +57,7 @@ func main() {
 	for k, _ := range factory {
 		http.HandleFunc("/" + k, FracHandler)
 	}
-	// Catch-all handler, just serves homepage, or redirects to homepage
+	// Catch-all handler, just serves homepage at "/", or 404s
 	http.HandleFunc("/", IndexHander)
 	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
