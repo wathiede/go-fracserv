@@ -51,8 +51,14 @@ func main() {
 		log.Fatalf("Directory %s not found, please run for directory containing %s\n", s, s)
 	}
 
+	// Setup handler for js, img, css files
 	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
-	http.HandleFunc("/", IndexServer)
+	// Register a handler per known fractal type
+	for k, _ := range factory {
+		http.HandleFunc("/" + k, FracHandler)
+	}
+	// Catch-all handler, just serves homepage, or redirects to homepage
+	http.HandleFunc("/", IndexHander)
 	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
@@ -111,19 +117,25 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	http.ServeFile(w, req, cachefn)
 }
 
-func IndexServer(w http.ResponseWriter, req *http.Request) {
+func FracHandler(w http.ResponseWriter, req *http.Request) {
 	// TODO(wathiede): check fracType against keys in factory before handing
 	// off to handler to prevent directory traversal exploit from malformed
 	// urls.
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
-		//log.Println("Found fractal type", fracType)
+		log.Println("Found fractal type", fracType)
 
 		if len(req.URL.Query()) != 0 {
 			drawFractal(w, req, fracType)
 		} else {
 			drawFractalPage(w, req, fracType)
 		}
+	}
+}
+
+func IndexHander(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		http.NotFound(w, req)
 		return
 	}
 
