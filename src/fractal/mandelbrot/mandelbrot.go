@@ -17,8 +17,6 @@ type Mandelbrot struct {
 }
 
 func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
-	it := opt.GetIntDefault("i", 256)
-	o := opt.GetIntDefault("o", 2)
 	w := opt.GetIntDefault("w", 256)
 	h := opt.GetIntDefault("h", 256)
 	x := opt.GetIntDefault("x", 0)
@@ -40,7 +38,8 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(float64(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, o}, nil
+	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p),
+		opt.GetIntDefault("i", 256), nav, opt.GetIntDefault("o", 2)}, nil
 }
 
 //func (m *Mandelbrot) At(x, y int) color.Color {
