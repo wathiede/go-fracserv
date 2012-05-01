@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"math/cmplx"
+	"runtime"
 )
 
 type Method int
@@ -18,7 +19,7 @@ const (
 )
 
 type Julia struct {
-	*image.Paletted
+	image.Paletted
 	maxIterations int
 	fractal.DefaultNavigator
 	mu complex128
@@ -52,10 +53,19 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(float64(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Julia{image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, mu, method}, nil
+	return &Julia{*image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, mu, method}, nil
 }
 
 func (j *Julia) ColorIndexAt(x, y int) uint8 {
+	defer func() {
+		runtime.Gosched()
+	}()
+	r, i := j.Transform(image.Pt(x, y))
+
+	return j.ComputeMembership(r, i)
+}
+
+func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	/*
 For every point (x,y) in your view rectangle 
   Let z=x+yi
@@ -71,7 +81,6 @@ For every point (x,y) in your view rectangle
 End for
 
 	*/
-	r, i := j.Transform(image.Pt(x, y))
 	z := complex(r, i)
 	// Start at -1 so the first escaped values get the first color.
 	it := -1

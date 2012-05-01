@@ -7,12 +7,13 @@ import (
 	"image"
 	"image/color"
 	"math/cmplx"
+	"runtime"
 )
 
 type Mandelbrot struct {
-	*image.Paletted
-	maxIterations int
+	image.Paletted
 	fractal.DefaultNavigator
+	maxIterations int
 	order int
 }
 
@@ -38,13 +39,23 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(float64(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Mandelbrot{image.NewPaletted(image.Rect(0, 0, w, h), p),
-		opt.GetIntDefault("i", 256), nav, opt.GetIntDefault("o", 2)}, nil
+	return &Mandelbrot{*image.NewPaletted(image.Rect(0, 0, w, h), p), nav,
+		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
 }
 
-//func (m *Mandelbrot) At(x, y int) color.Color {
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
+	defer func() {
+		runtime.Gosched()
+	}()
 	r, i := m.Transform(image.Pt(x, y))
+
+	return m.ComputeMembership(r, i)
+}
+
+
+// Takes in a coordinate in fractal space, and returns an index to the proper
+// coloring for that point
+func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 	z := complex(r, i)
 	w := complex(0, 0)
 	// Start at -1 so the first escaped values get the first color.
@@ -67,3 +78,4 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	// Black stored at m.Palette[0], so skip it
 	return 1 + uint8(it % (len(m.Palette)-1))
 }
+
