@@ -15,6 +15,23 @@ import (
 	"strings"
 )
 
+type debugT bool
+
+var debug = debugT(false)
+
+func (d debugT) Println(args ...interface{}) {
+	if d {
+		log.Println(args...)
+	}
+}
+
+func (d debugT) Printf(format string, args ...interface{}) {
+	if d {
+		log.Printf(format, args...)
+	}
+}
+
+
 type Lyapunov struct {
 	*image.RGBA
 	S string
@@ -51,7 +68,7 @@ func (l *Lyapunov) At(x, y int) color.Color {
 	b := float64(1 + (y / bounds.Dy()) * 4)
 
 	x0 := float64(0.5)
-	log.Println("First pass")
+	debug.Println("First pass")
 	for n := range l.S {
 		var r float64
 		switch {
@@ -63,7 +80,7 @@ func (l *Lyapunov) At(x, y int) color.Color {
 			log.Fatalf("Sequence value not A or B: %q", l.S[n])
 		}
 		x0 = r * x0 * (1 - x0)
-		//log.Println("x0", x0, "a", a, "b", b, "r", r)
+		debug.Println("x0", x0, "a", a, "b", b, "r", r)
 	}
 
 // 	double sum_log_deriv = 0;
@@ -83,7 +100,7 @@ func (l *Lyapunov) At(x, y int) color.Color {
 // 	}
 // 	double lambda = sum_log_deriv / (numRounds * seq_length);
 
-	log.Println("Second pass")
+	debug.Println("Second pass")
 	sumLogDeriv := float64(0)
 	for i := 0; i<l.N; i++ {
 		prodDeriv := float64(1);
@@ -98,19 +115,19 @@ func (l *Lyapunov) At(x, y int) color.Color {
 
 			prodDeriv *= r * (1 - 2 * x0)
 			x0 = r * x0 * (1 - x0)
-			//log.Println("x0", x0)
+			debug.Println("x0", x0)
 		}
 		derivLog := math.Log(math.Abs(prodDeriv))
 		sumLogDeriv += derivLog
-		//log.Println("derivLog", derivLog)
-		//log.Println("sumLogDeriv", sumLogDeriv)
+		debug.Println("derivLog", derivLog)
+		debug.Println("sumLogDeriv", sumLogDeriv)
 	}
 	lambda := sumLogDeriv / float64(l.N * len(l.S))
 	col := lambda
 	if col < 0 {
 		col += 1
 	}
-	log.Println("lambda", lambda, "col", col)
+	debug.Println("lambda", lambda, "col", col)
 
 	return color.RGBA{uint8(255 * col), 0, 0, 255}
 }
