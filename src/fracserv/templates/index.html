@@ -3,9 +3,10 @@
   <head>
     <meta charset="utf-8">
     <title>Fractal Server</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, user-scalable=no,
+	initial-scale=1.0, maximum-scale=1.0">
 
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
@@ -33,11 +34,6 @@
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
           <a class="brand" href="/">Fractal Server</a>
           <div class="nav-collapse">
             <ul class="nav">
@@ -53,21 +49,35 @@
     </div>
 
 	<div class="container">
-		<div id="masthead" class="hero-unit">
+		<div id="masthead">
 			<h1>Draw some fractals</h1>
-			<ol>
-				<li>Choose a fractal type from the nav bar at the top of the window</li>
-				<li>Navigate around like you would Google Maps
-                                (tweak the numbers in the lower right corner if
-                                you want)</li>
+			<ul>
+				<li> <span class="hidden-phone">Choose a fractal type from the
+					nav bar at the top of the window</span>
+				<span class="visible-phone">Choose a fractal type by clicking
+					a button below</span></li>
+				<li>Navigate around like you would Google Maps (tweak the
+				numbers in the lower right corner if you want)</li>
 				<li><em>Enjoy</em></li>
-			</ol>
+			</ul>
 		</div>
-		<div id="maps-outer" style="position:fixed;left:0;top:40px">
+		<ul id="mobile-jump" class="visible-phone nav nav-pills nav-stacked">
+			{{range $k, $v := .}}
+			<li><a class="btn btn-primary btn-large"
+				id="{{$k}}" href="/{{$k}}">{{$k}}</a>
+			</li>
+			{{end}}
+		</ul>
+		<div id="maps-outer" style="position:fixed;left:0;top:0;z-index:-10">
 			<div id="maps" style="width:100%;height:100%"></div>
 		</div>
-		<div id="config" class="well form-horizontal"
-			style="display:none;position:fixed;bottom:16px;right:16px"></div>
+		<div id="config" class="alert alert-info form-horizontal"
+			style="display:none;position:fixed;bottom:16px;right:16px">
+			<div id="config-content"></div>
+			<button id="hide" class="btn btn-mini btn-primary">Hide</button>
+		</div>
+		<img id="gear" style="position:fixed;bottom:16px;left:50%;display:none"
+		src="/static/img/glyphicons_019_cogwheel.png">
 	</div> <!-- /container -->
 </div>
 
