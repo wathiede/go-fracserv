@@ -123,7 +123,7 @@ func FracHandler(w http.ResponseWriter, req *http.Request) {
 	// urls.
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
-		log.Println("Found fractal type", fracType)
+		//log.Println("Found fractal type", fracType)
 
 		if len(req.URL.Query()) != 0 {
 			drawFractal(w, req, fracType)
