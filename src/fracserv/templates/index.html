@@ -38,7 +38,7 @@
           <div class="nav-collapse">
             <ul class="nav">
 			  {{range $k, $v := .}}
-			  <li><a id="{{$k}}" href="/{{$k}}">{{$k}}</a></li>
+			  <li><a id="{{$k}}" href="#{{$k}}">{{$k}}</a></li>
 			  {{end}}
 			  <!-- <li><a id="solid" href="/solid">Solid</a></li>-->
 			  <!-- <li><a href="#contact">Contact</a></li>-->
@@ -75,9 +75,25 @@
 			style="display:none;position:fixed;bottom:16px;right:16px">
 			<div id="config-content"></div>
 			<button id="hide" class="btn btn-mini btn-primary">Hide</button>
+			<button id="share" class="btn btn-mini btn-inverse">Share</button>
 		</div>
 		<img id="gear" style="position:fixed;bottom:16px;left:50%;display:none"
-		src="/static/img/glyphicons_019_cogwheel.png">
+			src="/static/img/glyphicons_019_cogwheel.png">
+
+	<div id="share-modal" class="modal hide">
+		<div class="modal-header">
+			<button class="close" data-dismiss="modal">&times;</button>
+			<h3>Use the following link to share</h3>
+		</div>
+		<div class="modal-body">
+			<h4>URL</h4>
+			<p id="share-url"><a href="#"></a></p>
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn" data-dismiss="modal">Close</a>
+		</div>
+	</div>
+
 	</div> <!-- /container -->
 </div>
 

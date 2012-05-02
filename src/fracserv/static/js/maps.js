@@ -1,6 +1,10 @@
-var getUrlVars = function() {
+var getUrlVars = function(url) {
 	var vars = {};
-	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+	var url;
+	if(url == undefined) {
+		url = window.location.href;
+	}
+	var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
 		vars[key] = value;
 	});
 	return vars;
@@ -58,11 +62,24 @@ function initialize(mapTypeName) {
 	map.setMapTypeId(mapTypeName);
 	map.panTo(myLatlng);
 	map.reload = function() {
+		// Crappy hack to make redraw work
 		map.setZoom(map.getZoom() + 0.00001);
 		zoomOut = function() {
 			map.setZoom(map.getZoom() - 0.00001)
 		};
 		setTimeout("zoomOut()", 1);
 	};
+	map.fracSave = function() {
+		options = {
+			c: map.getCenter().toUrlValue(),
+			z: map.getZoom(),
+		};
+		// Add any form elements to request
+		$('form input').each(function(idx, e) {
+			options[e.id] =  e.value;
+		});
+		return "#" + mapTypeName + "?" + serializeArray(options);
+	};
+
 	return map;
 }
