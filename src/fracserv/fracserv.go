@@ -13,18 +13,31 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"path"
+	"strings"
+	"time"
 )
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var port string
 var cacheDir string
+var disableCache bool
+
+type CachedPng struct {
+	Timestamp time.Time
+	Bytes []byte
+}
+
+func (c CachedPng) Size() int {
+	return len(c.Bytes)
+}
 
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
 	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
 		"directory to store rendered tiles. Directory must exist")
+	flag.BoolVar(&disableCache, "disableCache", false,
+		"never serve from disk cache")
 	flag.Parse()
 
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
@@ -69,6 +82,16 @@ func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) 
 }
 
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+	if disableCache {
+		i, err := factory[fracType](fractal.Options{req.URL.Query()})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		png.Encode(w, i)
+		return
+	}
+
 	cleanup := func(r rune) rune {
 		switch r {
 		case '?':
