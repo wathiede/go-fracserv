@@ -39,7 +39,7 @@ function initialize(mapTypeName) {
 			return "/" + mapTypeName + "?" + serializeArray(options);
 		},
 		tileSize: new google.maps.Size(size, size),
-		maxZoom: 1000,
+		maxZoom: 21, // TODO make this unlimited, or at least larger
 		minZoom: 0,
 		name: mapTypeName
 	};
