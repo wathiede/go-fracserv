@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"math/rand"
+	"sort"
 )
 
 type Debug struct {
@@ -60,8 +61,13 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	ft.SetSrc(image.White)
 
 	pt := freetype.Pt(6, 18)
-	for k, v := range o.Values {
-		_, err = ft.DrawString(fmt.Sprintf("%s = %s", k, v[0]), pt)
+	keys := []string{}
+	for k := range o.Values {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		_, err = ft.DrawString(fmt.Sprintf("%s = %s", k, o.Get(k)), pt)
 		if err != nil {
 			return nil, err
 		}
