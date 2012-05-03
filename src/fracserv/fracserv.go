@@ -121,9 +121,6 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 }
 
 func FracHandler(w http.ResponseWriter, req *http.Request) {
-	// TODO(wathiede): check fracType against keys in factory before handing
-	// off to handler to prevent directory traversal exploit from malformed
-	// urls.
 	fracType := req.URL.Path[1:]
 	if fracType != "" {
 		//log.Println("Found fractal type", fracType)
