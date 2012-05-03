@@ -138,6 +138,7 @@ func FracHandler(w http.ResponseWriter, req *http.Request) {
 
 func IndexHander(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Path != "/" {
+		log.Println("404:", req.URL)
 		http.NotFound(w, req)
 		return
 	}
