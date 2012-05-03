@@ -13,8 +13,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"path"
+	"strings"
+	"time"
 )
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
@@ -112,6 +113,8 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	}
 	// TODO(wathiede): log cache hits as expvar
 
+	// Set expire time
+	req.Header.Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
 	// Using this instead of io.Copy, sets Last-Modified which helps given
 	// the way the maps API makes lots of re-requests
 	http.ServeFile(w, req, cachefn)
