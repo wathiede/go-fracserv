@@ -14,6 +14,8 @@
 package main
 
 import (
+	"bytes"
+	"cache"
 	"flag"
 	"fmt"
 	"fractal"
@@ -34,11 +36,24 @@ import (
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var port string
 var cacheDir string
+var disableCache bool
+var pngCache cache.Cache
+
+type cachedPng struct {
+	Timestamp time.Time
+	Bytes []byte
+}
+
+func (c cachedPng) Size() int {
+	return len(c.Bytes)
+}
 
 func init() {
 	flag.StringVar(&port, "port", "8000", "webserver listen port")
 	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
 		"directory to store rendered tiles. Directory must exist")
+	flag.BoolVar(&disableCache, "disableCache", false,
+		"never serve from disk cache")
 	flag.Parse()
 
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
@@ -49,6 +64,9 @@ func init() {
 		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
+
+	// TODO(wathiede): load tiles on startup
+	pngCache = *cache.NewCache()
 }
 
 func main() {
@@ -88,7 +106,7 @@ func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) 
 	}
 }
 
-func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+func fsNameFromURL(url string) string {
 	cleanup := func(r rune) rune {
 		switch r {
 		case '?':
@@ -98,39 +116,90 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 		}
 		return r
 	}
-	cachefn := cacheDir + strings.Map(cleanup, req.URL.RequestURI())
+	return strings.Map(cleanup, url)
+}
+
+func savePngFromCache(cacheKey string) {
+	cacher, ok := pngCache.Get(cacheKey)
+	if !ok {
+		log.Printf("Attempt to save %q to disk, but image not in cache",
+			cacheKey)
+		return
+	}
+
+	cachefn := cacheDir + cacheKey
 	d := path.Dir(cachefn)
 	if _, err := os.Stat(d); err != nil {
 		log.Printf("Creating cache dir for %q", d)
 		err = os.Mkdir(d, 0700)
 	}
+
 	_, err := os.Stat(cachefn)
+	if err == nil {
+		log.Printf("Attempt to save %q to %q, but file already exists",
+			cacheKey, cachefn)
+		return
+	}
+
+	outf, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		// No file, create one
+		log.Printf("Failed to open tile %q for save: %s", cachefn, err)
+		return
+	}
+	cp := cacher.(cachedPng)
+	outf.Write(cp.Bytes)
+	outf.Close()
+
+	err = os.Chtimes(cachefn, cp.Timestamp, cp.Timestamp)
+	if err != nil {
+		log.Printf("Error setting atime and mtime on %q: %s", cachefn, err)
+	}
+}
+
+func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+	if disableCache {
+		i, err := factory[fracType](fractal.Options{req.URL.Query()})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		png.Encode(w, i)
+		return
+	}
+
+	cacheKey := fsNameFromURL(req.URL.RequestURI())
+	cacher, ok := pngCache.Get(cacheKey)
+	// TODO(wathiede): log cache hits as expvar
+	if !ok {
+		// No png in cache, create one
 		i, err := factory[fracType](fractal.Options{req.URL.Query()})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		outf, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Printf("Failed to open tile for save: %s", err)
-			// Just send png from memory
-			png.Encode(w, i)
-			return
-		}
-		// Save to disk and serve below with http.ServeFile
-		png.Encode(outf, i)
-		outf.Close()
+		b := &bytes.Buffer{}
+		png.Encode(b, i)
+		cacher = cachedPng{time.Now(), b.Bytes()}
+		pngCache.Add(cacheKey, cacher)
+
+		// Async save image to disk
+		// TODO make this a channel and serialize saving of images
+		go savePngFromCache(cacheKey)
 	}
-	// TODO(wathiede): log cache hits as expvar
+
+	cp := cacher.(cachedPng)
+
 
 	// Set expire time
 	req.Header.Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
 	// Using this instead of io.Copy, sets Last-Modified which helps given
 	// the way the maps API makes lots of re-requests
-	http.ServeFile(w, req, cachefn)
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Last-Modified", cp.Timestamp.Format(http.TimeFormat))
+	w.Header().Set("Expires",
+		cp.Timestamp.Add(time.Hour).Format(http.TimeFormat))
+	w.Write(cp.Bytes)
 }
 
 func FracHandler(w http.ResponseWriter, req *http.Request) {
