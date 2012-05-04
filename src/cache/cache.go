@@ -4,24 +4,30 @@ import (
 	"sync"
 )
 
-type Cacheable interface {
+type Cacher interface {
 	Size() int
 }
 
+type cacheMap map[string]Cacher
+
 type Cache struct {
-	data map[string]Cacheable
+	data cacheMap
 	Size uint64
 	mu sync.RWMutex
 }
 
-func (c *Cache) Add(key string, ca Cacheable) {
+func NewCache() *Cache {
+	return &Cache{cacheMap{}, 0, sync.RWMutex{}}
+}
+
+func (c *Cache) Add(key string, ca Cacher) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.data[key] = ca
 	c.Size += uint64(ca.Size())
 }
 
-func (c *Cache) Get(key string) (Cacheable, bool) {
+func (c *Cache) Get(key string) (Cacher, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	d, ok := c.data[key]
