@@ -1,3 +1,16 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package cache
 
 import (
@@ -30,8 +43,8 @@ func TestSimpleCache(t *testing.T) {
 
 	results := []struct {
 		k, s string
-		i int
-		ok bool
+		i    int
+		ok   bool
 	}{
 		{"k1", "Hello", 1, true},
 		{"k2", "World", 2, true},
@@ -39,7 +52,7 @@ func TestSimpleCache(t *testing.T) {
 	}
 
 	for _, r := range results {
-		c, ok := cache.Get(r.k);
+		c, ok := cache.Get(r.k)
 		if ok != r.ok {
 			t.Errorf("Get failed for key %q expected success '%t' actual success '%t'", r.k, r.ok, ok)
 		}
