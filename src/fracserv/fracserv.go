@@ -117,7 +117,6 @@ func loadCache() {
 			log.Printf("Error loading tile %q: %s", fn, err)
 			continue
 		}
-		defer f.Close()
 
 		s, err := f.Stat()
 		if err != nil {
@@ -125,6 +124,8 @@ func loadCache() {
 			continue
 		}
 		b, err := ioutil.ReadAll(f)
+		f.Close()
+
 		if err != nil {
 			log.Printf("Error reading tile %q: %s", fn, err)
 		}
