@@ -67,7 +67,6 @@ func init() {
 		//"lyapunov": lyapunov.NewFractal,
 	}
 
-	// TODO(wathiede): load tiles on startup
 	pngCache = *cache.NewCache()
 }
 
