@@ -127,10 +127,14 @@ func savePngFromCache(cacheKey string) {
 		log.Printf("Failed to open tile %q for save: %s", cachefn, err)
 		return
 	}
-	defer outf.Close()
-
 	cp := cacher.(cachedPng)
 	outf.Write(cp.Bytes)
+	outf.Close()
+
+	err = os.Chtimes(cachefn, cp.Timestamp, cp.Timestamp)
+	if err != nil {
+		log.Printf("Error setting atime and mtime on %q: %s", cachefn, err)
+	}
 }
 
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
