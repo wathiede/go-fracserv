@@ -42,10 +42,10 @@ func init() {
 	flag.Parse()
 
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
-		"debug": debug.NewFractal,
-		"solid": solid.NewFractal,
+		"debug":      debug.NewFractal,
+		"solid":      solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
-		"julia": julia.NewFractal,
+		"julia":      julia.NewFractal,
 		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
@@ -69,11 +69,11 @@ func main() {
 	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	// Register a handler per known fractal type
 	for k, _ := range factory {
-		http.HandleFunc("/" + k, FracHandler)
+		http.HandleFunc("/"+k, FracHandler)
 	}
 	// Catch-all handler, just serves homepage at "/", or 404s
 	http.HandleFunc("/", IndexHander)
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {

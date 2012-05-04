@@ -14,9 +14,9 @@
 package fractal
 
 import (
-	"log"
 	"image"
 	"image/color"
+	"log"
 	"math"
 	"net/url"
 	"strconv"
@@ -59,7 +59,7 @@ type Navigator interface {
 }
 
 type DefaultNavigator struct {
-	z float64
+	z      float64
 	offset image.Point
 }
 
@@ -71,7 +71,7 @@ func (n *DefaultNavigator) Transform(p image.Point) (float64, float64) {
 	x := p.X + n.offset.X
 	y := p.Y + n.offset.Y
 	z := math.Pow(2, n.z)
-	return float64(x)/z, float64(y)/z
+	return float64(x) / z, float64(y) / z
 }
 
 func (n *DefaultNavigator) GetTranslate() image.Point {
@@ -91,10 +91,10 @@ func (n *DefaultNavigator) GetZoom() float64 {
 }
 
 func HSVToRGBA(h, s, v float64) color.RGBA {
-	hi := int(math.Mod(math.Floor(h / 60), 6))
-	f := (h / 60) - math.Floor(h / 60)
+	hi := int(math.Mod(math.Floor(h/60), 6))
+	f := (h / 60) - math.Floor(h/60)
 	p := v * (1 - s)
-	q := v * (1 - (f*s))
+	q := v * (1 - (f * s))
 	t := v * (1 - ((1 - f) * s))
 
 	RGB := func(r, g, b float64) color.RGBA {
@@ -103,12 +103,18 @@ func HSVToRGBA(h, s, v float64) color.RGBA {
 
 	var c color.RGBA
 	switch hi {
-		case 0: c = RGB(v, t, p)
-		case 1: c = RGB(q, v, p)
-		case 2: c = RGB(p, v, t)
-		case 3: c = RGB(p, q, v)
-		case 4: c = RGB(t, p, v)
-		case 5: c = RGB(v, p, q)
+	case 0:
+		c = RGB(v, t, p)
+	case 1:
+		c = RGB(q, v, p)
+	case 2:
+		c = RGB(p, v, t)
+	case 3:
+		c = RGB(p, q, v)
+	case 4:
+		c = RGB(t, p, v)
+	case 5:
+		c = RGB(v, p, q)
 	}
 	return c
 }

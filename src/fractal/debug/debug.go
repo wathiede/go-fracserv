@@ -17,9 +17,9 @@ import (
 	"code.google.com/p/freetype-go/freetype"
 	"fmt"
 	"fractal"
-	"io/ioutil"
 	"image"
 	"image/color"
+	"io/ioutil"
 	"math/rand"
 	"sort"
 )
@@ -86,7 +86,6 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 		}
 		pt.Y += ft.PointToFix32(fontSize * lineSpacing)
 	}
-
 
 	return &Debug{*im}, nil
 }

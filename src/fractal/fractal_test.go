@@ -26,9 +26,9 @@ type F struct {
 
 func TestNavigator(t *testing.T) {
 	var datum = []struct {
-		z float64
+		z        float64
 		pix, off P
-		frac F
+		frac     F
 	}{
 		{1, P{0, 0}, P{0, 0}, F{0, 0}},
 		{1, P{0, 0}, P{4, 4}, F{4, 4}},

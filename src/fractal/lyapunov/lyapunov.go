@@ -44,7 +44,6 @@ func (d debugT) Printf(format string, args ...interface{}) {
 	}
 }
 
-
 type Lyapunov struct {
 	*image.RGBA
 	S string
@@ -77,8 +76,8 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 func (l *Lyapunov) At(x, y int) color.Color {
 	bounds := l.Bounds()
 
-	a := float64(1 + (x / bounds.Dx()) * 4)
-	b := float64(1 + (y / bounds.Dy()) * 4)
+	a := float64(1 + (x/bounds.Dx())*4)
+	b := float64(1 + (y/bounds.Dy())*4)
 
 	x0 := float64(0.5)
 	debug.Println("First pass")
@@ -96,27 +95,27 @@ func (l *Lyapunov) At(x, y int) color.Color {
 		debug.Println("x0", x0, "a", a, "b", b, "r", r)
 	}
 
-// 	double sum_log_deriv = 0;
-// 	for (int n = 0; n < numRounds; n++)
-// 	{
-// 		double prod_deriv = 1;
-// 		for (int m = 0; m < seq_length; m++)
-// 		{
-// 			r = seq[m] == 1 ? b : a;
-// 			/* avoid computing too many logarithms. One every round is acceptable. */
-// 			prod_deriv *= r * (1 - 2 * x);
-// 			x = r * x * (1 - x);
-// 		}
-// 		double deriv_log = Math.Log(Math.Abs(prod_deriv));
-// 		sum_log_deriv += deriv_log;
-// 		//Console.WriteLine("(" + xPos + "," + yPos + ") Iter " + n + " Log " + deriv_log);
-// 	}
-// 	double lambda = sum_log_deriv / (numRounds * seq_length);
+	// 	double sum_log_deriv = 0;
+	// 	for (int n = 0; n < numRounds; n++)
+	// 	{
+	// 		double prod_deriv = 1;
+	// 		for (int m = 0; m < seq_length; m++)
+	// 		{
+	// 			r = seq[m] == 1 ? b : a;
+	// 			/* avoid computing too many logarithms. One every round is acceptable. */
+	// 			prod_deriv *= r * (1 - 2 * x);
+	// 			x = r * x * (1 - x);
+	// 		}
+	// 		double deriv_log = Math.Log(Math.Abs(prod_deriv));
+	// 		sum_log_deriv += deriv_log;
+	// 		//Console.WriteLine("(" + xPos + "," + yPos + ") Iter " + n + " Log " + deriv_log);
+	// 	}
+	// 	double lambda = sum_log_deriv / (numRounds * seq_length);
 
 	debug.Println("Second pass")
 	sumLogDeriv := float64(0)
-	for i := 0; i<l.N; i++ {
-		prodDeriv := float64(1);
+	for i := 0; i < l.N; i++ {
+		prodDeriv := float64(1)
 		for n := range l.S {
 			var r float64
 			switch {
@@ -126,7 +125,7 @@ func (l *Lyapunov) At(x, y int) color.Color {
 				r = b
 			}
 
-			prodDeriv *= r * (1 - 2 * x0)
+			prodDeriv *= r * (1 - 2*x0)
 			x0 = r * x0 * (1 - x0)
 			debug.Println("x0", x0)
 		}
@@ -135,7 +134,7 @@ func (l *Lyapunov) At(x, y int) color.Color {
 		debug.Println("derivLog", derivLog)
 		debug.Println("sumLogDeriv", sumLogDeriv)
 	}
-	lambda := sumLogDeriv / float64(l.N * len(l.S))
+	lambda := sumLogDeriv / float64(l.N*len(l.S))
 	col := lambda
 	if col < 0 {
 		col += 1

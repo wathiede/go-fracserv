@@ -27,7 +27,7 @@ type Mandelbrot struct {
 	image.Paletted
 	fractal.DefaultNavigator
 	maxIterations int
-	order int
+	order         int
 }
 
 func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
@@ -39,8 +39,8 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 
 	p := color.Palette{color.Black}
 	numColors := float64(12)
-	for i := float64(0); i<numColors; i += 1 {
-		degree := i/numColors * 360
+	for i := float64(0); i < numColors; i += 1 {
+		degree := i / numColors * 360
 		p = append(p, fractal.HSVToRGBA(degree, 1, 1))
 	}
 
@@ -65,7 +65,6 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	return m.ComputeMembership(r, i)
 }
 
-
 // Takes in a coordinate in fractal space, and returns an index to the proper
 // coloring for that point
 func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
@@ -75,7 +74,7 @@ func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 	it := -1
 	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
 		v := w
-		for i := 1; i<m.order; i++ {
+		for i := 1; i < m.order; i++ {
 			v *= w
 		}
 		w = v + z
@@ -89,6 +88,5 @@ func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 	}
 
 	// Black stored at m.Palette[0], so skip it
-	return 1 + uint8(it % (len(m.Palette)-1))
+	return 1 + uint8(it%(len(m.Palette)-1))
 }
-

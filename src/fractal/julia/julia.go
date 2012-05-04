@@ -16,8 +16,8 @@
 package julia
 
 import (
-	"fractal"
 	"fmt"
+	"fractal"
 	"image"
 	"image/color"
 	"math/cmplx"
@@ -25,6 +25,7 @@ import (
 )
 
 type Method int
+
 const (
 	method_unset = iota
 	method_zSquared
@@ -35,7 +36,7 @@ type Julia struct {
 	image.Paletted
 	maxIterations int
 	fractal.DefaultNavigator
-	mu complex128
+	mu     complex128
 	method Method
 }
 
@@ -53,8 +54,8 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 
 	p := color.Palette{color.Black}
 	numColors := float64(12)
-	for i := float64(0); i<numColors; i += 1 {
-		degree := i/numColors * 360
+	for i := float64(0); i < numColors; i += 1 {
+		degree := i / numColors * 360
 		p = append(p, fractal.HSVToRGBA(degree, 1, 1))
 	}
 
@@ -80,18 +81,18 @@ func (j *Julia) ColorIndexAt(x, y int) uint8 {
 
 func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	/*
-For every point (x,y) in your view rectangle 
-  Let z=x+yi
-  Set n=0
-  While(n less than limit and |z|<2)
-    Let z=z*z+mu
-    Increment n
-  End While
-  if(|z|<2) then z is a member of the approximate 
-    Julia set, plot (x,y) in the Julia set color
-  otherwise z is outside the Julia set, 
-    plot (x,y) in the outside color.
-End for
+	For every point (x,y) in your view rectangle 
+	  Let z=x+yi
+	  Set n=0
+	  While(n less than limit and |z|<2)
+	    Let z=z*z+mu
+	    Increment n
+	  End While
+	  if(|z|<2) then z is a member of the approximate 
+	    Julia set, plot (x,y) in the Julia set color
+	  otherwise z is outside the Julia set, 
+	    plot (x,y) in the outside color.
+	End for
 
 	*/
 	z := complex(r, i)
@@ -102,7 +103,7 @@ End for
 		panic("Julia method not set")
 	case method_zSquared:
 		for (cmplx.Abs(z) < 2) && (it < j.maxIterations) {
-			z = z * z + j.mu
+			z = z*z + j.mu
 			it++
 		}
 		if cmplx.Abs(z) < 2 {
@@ -122,7 +123,6 @@ End for
 		panic(fmt.Sprintf("Unknown julia method %q", j.method))
 	}
 
-
 	// Black stored at j.Palette[0], so skip it
-	return 1 + uint8(it % (len(j.Palette)-1))
+	return 1 + uint8(it%(len(j.Palette)-1))
 }
