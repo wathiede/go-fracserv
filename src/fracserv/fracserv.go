@@ -117,6 +117,8 @@ func loadCache() {
 			log.Printf("Error loading tile %q: %s", fn, err)
 			continue
 		}
+		defer f.Close()
+
 		s, err := f.Stat()
 		if err != nil {
 			log.Printf("Error stating tile %q: %s", fn, err)
