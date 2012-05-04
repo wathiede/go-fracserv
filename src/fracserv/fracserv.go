@@ -25,10 +25,12 @@ import (
 	"fractal/solid"
 	"html/template"
 	"image/png"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -83,6 +85,8 @@ func main() {
 		log.Fatalf("Directory %s not found, please run for directory containing %s\n", s, s)
 	}
 
+	go loadCache()
+
 	// Setup handler for js, img, css files
 	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	// Register a handler per known fractal type
@@ -92,6 +96,41 @@ func main() {
 	// Catch-all handler, just serves homepage at "/", or 404s
 	http.HandleFunc("/", IndexHander)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func loadCache() {
+	if disableCache {
+		log.Printf("Caching disable, not loading cache")
+		return
+	}
+
+	files, err := filepath.Glob(cacheDir + "/*/*")
+	if err != nil {
+		log.Printf("Error globing cachedir %q: %s", cacheDir, err)
+	}
+
+	for idx, fn := range files {
+		if idx % 1000 == 0 {
+			log.Printf("Loading %d/%d cached tiles...", idx, len(files))
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			log.Printf("Error loading tile %q: %s", fn, err)
+			continue
+		}
+		s, err := f.Stat()
+		if err != nil {
+			log.Printf("Error stating tile %q: %s", fn, err)
+			continue
+		}
+		b, err := ioutil.ReadAll(f)
+		if err != nil {
+			log.Printf("Error reading tile %q: %s", fn, err)
+		}
+		cacher := cachedPng{s.ModTime(), b}
+		pngCache.Add(path.Base(fn), cacher)
+	}
+	log.Printf("Loaded %d cached tiles.", len(files))
 }
 
 func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
