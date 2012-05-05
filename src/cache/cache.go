@@ -74,4 +74,3 @@ func (c *Cache) Del(key string) {
 		c.Size -= ca.Size()
 	*/
 }
-

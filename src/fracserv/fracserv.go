@@ -35,6 +35,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	_ "net/http/pprof"
 )
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
@@ -45,7 +47,7 @@ var pngCache cache.Cache
 
 type cachedPng struct {
 	Timestamp time.Time
-	Bytes []byte
+	Bytes     []byte
 }
 
 func (c cachedPng) Size() int {
@@ -111,7 +113,7 @@ func loadCache() {
 	}
 
 	for idx, fn := range files {
-		if idx % 1000 == 0 {
+		if idx%1000 == 0 {
 			log.Printf("Loading %d/%d cached tiles...", idx, len(files))
 		}
 		f, err := os.Open(fn)
@@ -161,7 +163,7 @@ func fsNameFromURL(u *url.URL) string {
 	sort.Strings(keys)
 	p := []string{}
 	for _, k := range keys {
-		p = append(p, k + "=" + q[k][0])
+		p = append(p, k+"="+q[k][0])
 	}
 
 	return fn + strings.Join(p, ",")
@@ -236,7 +238,6 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	}
 
 	cp := cacher.(cachedPng)
-
 
 	// Set expire time
 	req.Header.Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))

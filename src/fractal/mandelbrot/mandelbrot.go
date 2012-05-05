@@ -50,16 +50,13 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       work with our math
 	//   +7: The zoom factor is converted to 2^z, so having a zoom factor of 7
 	//       (128x) makes the fractal range comfortably visible in pixel space
-	nav := fractal.NewDefaultNavigator(float64(z+1+6), x*w, y*h)
+	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
 	return &Mandelbrot{*image.NewPaletted(image.Rect(0, 0, w, h), p), nav,
 		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
 }
 
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
-	defer func() {
-		runtime.Gosched()
-	}()
 	r, i := m.Transform(image.Pt(x, y))
 
 	return m.ComputeMembership(r, i)

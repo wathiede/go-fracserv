@@ -14,7 +14,10 @@
 package fractal
 
 import (
+	"bytes"
 	"image"
+	"image/color"
+	"image/png"
 	"testing"
 )
 
@@ -26,7 +29,7 @@ type F struct {
 
 func TestNavigator(t *testing.T) {
 	var datum = []struct {
-		z        float64
+		z        uint
 		pix, off P
 		frac     F
 	}{
@@ -49,5 +52,31 @@ func TestNavigator(t *testing.T) {
 			t.Errorf("Transform failed for %v: expected Y of %f, got %f", d,
 				d.frac.Y, transY)
 		}
+	}
+}
+
+type testFrac struct {
+	image.Uniform
+	count int
+}
+
+func (f *testFrac) At(x, y int) color.Color {
+	f.count++
+	return f.C
+}
+
+func (f *testFrac) Bounds() image.Rectangle {
+	return image.Rect(0, 0, 4, 4)
+}
+
+func TestPngEncode(t *testing.T) {
+	f := &testFrac{*image.NewUniform(color.Black), 0}
+	b := &bytes.Buffer{}
+	png.Encode(b, f)
+
+	ec := 16
+	if f.count != ec {
+		t.Errorf("Expected to call At %d times, called it %d times", ec,
+			f.count)
 	}
 }

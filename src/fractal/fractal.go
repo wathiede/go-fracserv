@@ -55,23 +55,23 @@ type Navigator interface {
 	// Set offset in pixel space
 	Translate(offset image.Point)
 	// Set the zoom depth for this transformation
-	Zoom(z float64)
+	Zoom(z int)
 }
 
 type DefaultNavigator struct {
-	z      float64
+	z      uint
 	offset image.Point
 }
 
-func NewDefaultNavigator(z float64, xoff, yoff int) DefaultNavigator {
+func NewDefaultNavigator(z uint, xoff, yoff int) DefaultNavigator {
 	return DefaultNavigator{z, image.Pt(xoff, yoff)}
 }
 
 func (n *DefaultNavigator) Transform(p image.Point) (float64, float64) {
-	x := p.X + n.offset.X
-	y := p.Y + n.offset.Y
-	z := math.Pow(2, n.z)
-	return float64(x) / z, float64(y) / z
+	x := float64(p.X + n.offset.X)
+	y := float64(p.Y + n.offset.Y)
+	z := float64(uint(1) << n.z)
+	return x / z, y / z
 }
 
 func (n *DefaultNavigator) GetTranslate() image.Point {
@@ -82,12 +82,20 @@ func (n *DefaultNavigator) Translate(offset image.Point) {
 	n.offset = offset
 }
 
-func (n *DefaultNavigator) Zoom(z float64) {
+func (n *DefaultNavigator) Zoom(z uint) {
 	n.z = z
 }
 
-func (n *DefaultNavigator) GetZoom() float64 {
+func (n *DefaultNavigator) GetZoom() uint {
 	return n.z
+}
+
+// Performs |z| < l without the expensive sqrt
+func AbsLessThan(z complex128, l float64) bool {
+	rz := real(z)
+	iz := imag(z)
+
+	return (rz*rz + iz*iz) < (l * l)
 }
 
 func HSVToRGBA(h, s, v float64) color.RGBA {

@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -13,10 +13,11 @@ import (
 
 var host string
 var maxConcurrent int
+
 type ByteSize float64
 
 type result struct {
-	size int
+	size     int
 	duration time.Duration
 }
 
@@ -69,14 +70,14 @@ func urlBuilder(urls chan string) {
 	hi_y := 6
 	low_y := -hi_y
 
-	hi_z := 20
+	hi_z := 10
 	low_z := 1
 
 	i := 50
 
 	for z := low_z; z < hi_z; z++ {
-		for x := low_x * z; x < hi_x * z; x++ {
-			for y := low_y * z; y < hi_y * z; y++ {
+		for x := low_x * z; x < hi_x*z; x++ {
+			for y := low_y * z; y < hi_y*z; y++ {
 				p := url.Values{}
 				p.Add("h", "128")
 				p.Add("i", strconv.Itoa(i))
@@ -137,14 +138,14 @@ func work(urls chan string) {
 	printStats := func() {
 		log.Printf("Fetched %d urls %d bytes in %s", total_request,
 			total_size, total_duration)
-		log.Printf("Avg %.2f QPS", float64(total_request) /
+		log.Printf("Avg %.2f QPS", float64(total_request)/
 			total_duration.Seconds())
-		log.Printf("Avg %s/s", ByteSize(float64(total_size) /
+		log.Printf("Avg %s/s", ByteSize(float64(total_size)/
 			total_duration.Seconds()))
 	}
 
 	for url := range urls {
-		if total_request != 0 && total_request % 1000 == 0 {
+		if total_request != 0 && total_request%1000 == 0 {
 			printStats()
 		}
 		urlCh <- url
@@ -157,4 +158,3 @@ func work(urls chan string) {
 
 	printStats()
 }
-
