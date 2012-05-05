@@ -116,20 +116,14 @@ func loadCache() {
 		if idx%1000 == 0 {
 			log.Printf("Loading %d/%d cached tiles...", idx, len(files))
 		}
-		f, err := os.Open(fn)
-		if err != nil {
-			log.Printf("Error loading tile %q: %s", fn, err)
-			continue
-		}
 
-		s, err := f.Stat()
+		s, err := os.Stat(fn)
 		if err != nil {
 			log.Printf("Error stating tile %q: %s", fn, err)
 			continue
 		}
-		b, err := ioutil.ReadAll(f)
-		f.Close()
 
+		b, err := ioutil.ReadFile(fn)
 		if err != nil {
 			log.Printf("Error reading tile %q: %s", fn, err)
 		}
