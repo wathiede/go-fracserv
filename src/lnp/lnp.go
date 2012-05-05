@@ -12,7 +12,7 @@ import (
 )
 
 var host string
-var maxConcurent int
+var maxConcurrent int
 type ByteSize float64
 
 type result struct {
@@ -56,7 +56,7 @@ func (b ByteSize) String() string {
 
 func init() {
 	flag.StringVar(&host, "host", "http://localhost:8000/julia", "HTTP host")
-	flag.IntVar(&maxConcurent, "maxConcurent", 1,
+	flag.IntVar(&maxConcurrent, "maxConcurrent", 1,
 		"Max number of simultaneous requests")
 
 	flag.Parse()
@@ -96,7 +96,7 @@ func urlBuilder(urls chan string) {
 }
 
 func main() {
-	urls := make(chan string, maxConcurent)
+	urls := make(chan string, maxConcurrent)
 	go urlBuilder(urls)
 	work(urls)
 }
@@ -124,9 +124,9 @@ func work(urls chan string) {
 	var total_request, total_size int
 	var total_duration time.Duration
 
-	urlCh := make(chan string, maxConcurent)
-	res := make(chan result, maxConcurent)
-	for i := 0; i < maxConcurent; i++ {
+	urlCh := make(chan string, maxConcurrent)
+	res := make(chan result, maxConcurrent)
+	for i := 0; i < maxConcurrent; i++ {
 		go func() {
 			for url := range urlCh {
 				res <- timedFetch(url)
