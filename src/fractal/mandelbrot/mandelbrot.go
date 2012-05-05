@@ -20,7 +20,6 @@ import (
 	"image"
 	"image/color"
 	"math/cmplx"
-	"runtime"
 )
 
 type Mandelbrot struct {
