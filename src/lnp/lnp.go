@@ -144,7 +144,7 @@ func work(urls chan string) {
 	}
 
 	for url := range urls {
-		if total_request % 1000 == 0 {
+		if total_request != 0 && total_request % 1000 == 0 {
 			printStats()
 		}
 		urlCh <- url
