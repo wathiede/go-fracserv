@@ -28,9 +28,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
@@ -130,7 +132,7 @@ func loadCache() {
 			log.Printf("Error reading tile %q: %s", fn, err)
 		}
 		cacher := cachedPng{s.ModTime(), b}
-		pngCache.Add(path.Base(fn), cacher)
+		pngCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
 	}
 	log.Printf("Loaded %d cached tiles.", len(files))
 }
@@ -147,17 +149,22 @@ func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) 
 	}
 }
 
-func fsNameFromURL(url string) string {
-	cleanup := func(r rune) rune {
-		switch r {
-		case '?':
-			return '/'
-		case '&':
-			return ','
-		}
-		return r
+func fsNameFromURL(u *url.URL) string {
+	fn := strings.TrimLeft(u.Path, "/") + "/"
+	keys := []string{}
+	q := u.Query()
+
+	for k := range q {
+		keys = append(keys, k)
 	}
-	return strings.Map(cleanup, url)
+
+	sort.Strings(keys)
+	p := []string{}
+	for _, k := range keys {
+		p = append(p, k + "=" + q[k][0])
+	}
+
+	return fn + strings.Join(p, ",")
 }
 
 func savePngFromCache(cacheKey string) {
@@ -208,9 +215,8 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 		return
 	}
 
-	cacheKey := fsNameFromURL(req.URL.RequestURI())
+	cacheKey := fsNameFromURL(req.URL)
 	cacher, ok := pngCache.Get(cacheKey)
-	// TODO(wathiede): log cache hits as expvar
 	if !ok {
 		// No png in cache, create one
 		i, err := factory[fracType](fractal.Options{req.URL.Query()})
