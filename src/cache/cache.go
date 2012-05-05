@@ -14,6 +14,7 @@
 package cache
 
 import (
+	"expvar"
 	"sync"
 )
 
@@ -29,6 +30,16 @@ type Cache struct {
 	mu   sync.RWMutex
 }
 
+var cacheStats *expvar.Map
+var cacheSizeBytes *expvar.Int
+var cacheSizeCount *expvar.Int
+
+func init() {
+	cacheStats = expvar.NewMap("cache-stats")
+	cacheSizeBytes = expvar.NewInt("cache-size-bytes")
+	cacheSizeCount = expvar.NewInt("cache-size-count")
+}
+
 func NewCache() *Cache {
 	return &Cache{cacheMap{}, 0, sync.RWMutex{}}
 }
@@ -38,12 +49,19 @@ func (c *Cache) Add(key string, ca Cacher) {
 	defer c.mu.Unlock()
 	c.data[key] = ca
 	c.Size += uint64(ca.Size())
+	cacheSizeBytes.Set(int64(c.Size))
+	cacheSizeCount.Set(int64(len(c.data)))
 }
 
 func (c *Cache) Get(key string) (Cacher, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	d, ok := c.data[key]
+	if ok {
+		cacheStats.Add("hits", 1)
+	} else {
+		cacheStats.Add("miss", 1)
+	}
 	return d, ok
 }
 
@@ -56,3 +74,4 @@ func (c *Cache) Del(key string) {
 		c.Size -= ca.Size()
 	*/
 }
+
