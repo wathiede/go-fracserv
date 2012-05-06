@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package main
+package fracserv
 
 import (
 	"bytes"
@@ -25,13 +25,9 @@ import (
 	"fractal/solid"
 	"html/template"
 	"image/png"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -40,26 +36,20 @@ import (
 )
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
-var port string
-var cacheDir string
-var disableCache bool
-var pngCache cache.Cache
+var PngCache cache.Cache
+var DisableCache = flag.Bool("DisableCache", false,
+	"disables all caching, ever requested rendered on demand")
 
-type cachedPng struct {
+type CachedPng struct {
 	Timestamp time.Time
 	Bytes     []byte
 }
 
-func (c cachedPng) Size() int {
+func (c CachedPng) Size() int {
 	return len(c.Bytes)
 }
 
 func init() {
-	flag.StringVar(&port, "port", "8000", "webserver listen port")
-	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
-		"directory to store rendered tiles. Directory must exist")
-	flag.BoolVar(&disableCache, "disableCache", false,
-		"never serve from disk cache")
 	flag.Parse()
 
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
@@ -71,66 +61,14 @@ func init() {
 		//"lyapunov": lyapunov.NewFractal,
 	}
 
-	pngCache = *cache.NewCache()
-}
+	PngCache = *cache.NewCache()
 
-func main() {
-	fmt.Printf("Listening on:\n")
-	host, err := os.Hostname()
-	if err != nil {
-		log.Fatal("Failed to get hostname from os:", err)
-	}
-	fmt.Printf("  http://%s:%s/\n", host, port)
-
-	s := "static/"
-	_, err = os.Open(s)
-	if os.IsNotExist(err) {
-		log.Fatalf("Directory %s not found, please run for directory containing %s\n", s, s)
-	}
-
-	go loadCache()
-
-	// Setup handler for js, img, css files
-	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
 	// Register a handler per known fractal type
 	for k, _ := range factory {
 		http.HandleFunc("/"+k, FracHandler)
 	}
 	// Catch-all handler, just serves homepage at "/", or 404s
 	http.HandleFunc("/", IndexHander)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func loadCache() {
-	if disableCache {
-		log.Printf("Caching disable, not loading cache")
-		return
-	}
-
-	files, err := filepath.Glob(cacheDir + "/*/*")
-	if err != nil {
-		log.Printf("Error globing cachedir %q: %s", cacheDir, err)
-	}
-
-	for idx, fn := range files {
-		if idx%1000 == 0 {
-			log.Printf("Loading %d/%d cached tiles...", idx, len(files))
-		}
-
-		s, err := os.Stat(fn)
-		if err != nil {
-			log.Printf("Error stating tile %q: %s", fn, err)
-			continue
-		}
-
-		b, err := ioutil.ReadFile(fn)
-		if err != nil {
-			log.Printf("Error reading tile %q: %s", fn, err)
-		}
-		cacher := cachedPng{s.ModTime(), b}
-		pngCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
-	}
-	log.Printf("Loaded %d cached tiles.", len(files))
 }
 
 func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
@@ -163,45 +101,8 @@ func fsNameFromURL(u *url.URL) string {
 	return fn + strings.Join(p, ",")
 }
 
-func savePngFromCache(cacheKey string) {
-	cacher, ok := pngCache.Get(cacheKey)
-	if !ok {
-		log.Printf("Attempt to save %q to disk, but image not in cache",
-			cacheKey)
-		return
-	}
-
-	cachefn := cacheDir + cacheKey
-	d := path.Dir(cachefn)
-	if _, err := os.Stat(d); err != nil {
-		log.Printf("Creating cache dir for %q", d)
-		err = os.Mkdir(d, 0700)
-	}
-
-	_, err := os.Stat(cachefn)
-	if err == nil {
-		log.Printf("Attempt to save %q to %q, but file already exists",
-			cacheKey, cachefn)
-		return
-	}
-
-	outf, err := os.OpenFile(cachefn, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Printf("Failed to open tile %q for save: %s", cachefn, err)
-		return
-	}
-	cp := cacher.(cachedPng)
-	outf.Write(cp.Bytes)
-	outf.Close()
-
-	err = os.Chtimes(cachefn, cp.Timestamp, cp.Timestamp)
-	if err != nil {
-		log.Printf("Error setting atime and mtime on %q: %s", cachefn, err)
-	}
-}
-
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
-	if disableCache {
+	if *DisableCache {
 		i, err := factory[fracType](fractal.Options{req.URL.Query()})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -212,7 +113,7 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	}
 
 	cacheKey := fsNameFromURL(req.URL)
-	cacher, ok := pngCache.Get(cacheKey)
+	cacher, ok := PngCache.Get(cacheKey)
 	if !ok {
 		// No png in cache, create one
 		i, err := factory[fracType](fractal.Options{req.URL.Query()})
@@ -223,15 +124,15 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 
 		b := &bytes.Buffer{}
 		png.Encode(b, i)
-		cacher = cachedPng{time.Now(), b.Bytes()}
-		pngCache.Add(cacheKey, cacher)
+		cacher = CachedPng{time.Now(), b.Bytes()}
+		PngCache.Add(cacheKey, cacher)
 
 		// Async save image to disk
 		// TODO make this a channel and serialize saving of images
-		go savePngFromCache(cacheKey)
+		//go savePngFromCache(cacheKey)
 	}
 
-	cp := cacher.(cachedPng)
+	cp := cacher.(CachedPng)
 
 	// Set expire time
 	req.Header.Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
