@@ -14,7 +14,7 @@
 package solid
 
 import (
-	"fractal"
+	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"net/url"
 	"testing"

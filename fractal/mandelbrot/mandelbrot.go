@@ -11,40 +11,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// Implementes Julia set, see:
-//   http://eldar.mathstat.uoguelph.ca/dashlock/ftax/Julia.html
-package julia
+// Implementes Mandelbrot set, see:
+//   http://eldar.mathstat.uoguelph.ca/dashlock/ftax/Mandel.html
+package mandelbrot
 
 import (
-	"fmt"
-	"fractal"
+	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"math/cmplx"
 )
 
-type Method int
-
-const (
-	method_unset = iota
-	method_zSquared
-	method_consine
-)
-
-type Julia struct {
+type Mandelbrot struct {
 	image.Paletted
-	maxIterations int
 	fractal.DefaultNavigator
-	mu     complex128
-	method Method
+	maxIterations int
+	order         int
 }
 
 func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
-	it := opt.GetIntDefault("i", 256)
-	mu_r := opt.GetFloat64Default("mu_r", 0.36237)
-	mu_i := opt.GetFloat64Default("mu_i", 0.32)
-	mu := complex(mu_r, mu_i)
-	method := Method(opt.GetIntDefault("method", 1))
 	w := opt.GetIntDefault("w", 256)
 	h := opt.GetIntDefault("h", 256)
 	x := opt.GetIntDefault("x", 0)
@@ -66,59 +51,38 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Julia{*image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, mu, method}, nil
+	return &Mandelbrot{*image.NewPaletted(image.Rect(0, 0, w, h), p), nav,
+		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
 }
 
-func (j *Julia) ColorIndexAt(x, y int) uint8 {
-	r, i := j.Transform(image.Pt(x, y))
+func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
+	r, i := m.Transform(image.Pt(x, y))
 
-	return j.ComputeMembership(r, i)
+	return m.ComputeMembership(r, i)
 }
 
-func (j *Julia) ComputeMembership(r, i float64) uint8 {
-	/*
-		For every point (x,y) in your view rectangle 
-		  Let z=x+yi
-		  Set n=0
-		  While(n less than limit and |z|<2)
-		    Let z=z*z+mu
-		    Increment n
-		  End While
-		  if(|z|<2) then z is a member of the approximate 
-		    Julia set, plot (x,y) in the Julia set color
-		  otherwise z is outside the Julia set, 
-		    plot (x,y) in the outside color.
-		End for
-
-	*/
+// Takes in a coordinate in fractal space, and returns an index to the proper
+// coloring for that point
+func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 	z := complex(r, i)
+	w := complex(0, 0)
 	// Start at -1 so the first escaped values get the first color.
 	it := -1
-	switch j.method {
-	case method_unset:
-		panic("Julia method not set")
-	case method_zSquared:
-		for fractal.AbsLessThan(z, 2) && (it < j.maxIterations) {
-			z = z*z + j.mu
-			it++
+	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
+		v := w
+		for i := 1; i < m.order; i++ {
+			v *= w
 		}
-		if fractal.AbsLessThan(z, 2) {
-			// Pixel in julia set, return black
-			return 0
-		}
-	case method_consine:
-		for fractal.AbsLessThan(z, 12) && (it < j.maxIterations) {
-			z = cmplx.Cos(z) + j.mu
-			it++
-		}
-		if fractal.AbsLessThan(z, 12) {
-			// Pixel in julia set, return black
-			return 0
-		}
-	default:
-		panic(fmt.Sprintf("Unknown julia method %q", j.method))
+		w = v + z
+
+		it++
 	}
 
-	// Black stored at j.Palette[0], so skip it
-	return 1 + uint8(it%(len(j.Palette)-1))
+	if cmplx.Abs(w) < 2 {
+		// Pixel in mandelbrot set, return black
+		return 0
+	}
+
+	// Black stored at m.Palette[0], so skip it
+	return 1 + uint8(it%(len(m.Palette)-1))
 }

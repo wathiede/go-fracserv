@@ -15,8 +15,8 @@ package debug
 
 import (
 	"code.google.com/p/freetype-go/freetype"
+	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
-	"fractal"
 	"image"
 	"image/color"
 	"io/ioutil"

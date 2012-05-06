@@ -14,8 +14,8 @@
 package solid
 
 import (
+	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
-	"fractal"
 	"image"
 	"image/color"
 )
