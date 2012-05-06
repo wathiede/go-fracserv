@@ -1,3 +1,4 @@
+// +build !appengine !appenginedev
 package main
 
 import (

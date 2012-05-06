@@ -1,9 +1,10 @@
+// +build !appengine !appenginedev
 package main
 
 import (
 	"flag"
 	"fmt"
-	"fracserv"
+	"code.google.com/p/go-fracserv/fracserv"
 	"log"
 	"io/ioutil"
 	"net/http"

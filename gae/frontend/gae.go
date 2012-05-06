@@ -3,7 +3,7 @@ package appengine
 import (
 	"fmt"
 	"net/http"
-	"fracserv"
+	_ "code.google.com/p/go-fracserv/fracserv"
 )
 
 func init() {
