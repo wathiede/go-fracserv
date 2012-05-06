@@ -171,7 +171,7 @@ func savePngFromCache(cacheKey string) {
 		return
 	}
 
-	cachefn := cacheDir + cacheKey
+	cachefn := path.Join(cacheDir, cacheKey)
 	d := path.Dir(cachefn)
 	if _, err := os.Stat(d); err != nil {
 		log.Printf("Creating cache dir for %q", d)
