@@ -16,7 +16,7 @@
 package mandelbrot
 
 import (
-	"fractal"
+	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"math/cmplx"

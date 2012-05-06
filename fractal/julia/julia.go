@@ -17,7 +17,7 @@ package julia
 
 import (
 	"fmt"
-	"fractal"
+	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"math/cmplx"

@@ -19,7 +19,7 @@ package lyapunov
 
 import (
 	"fmt"
-	"fractal"
+	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"log"
