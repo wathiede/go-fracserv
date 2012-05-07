@@ -28,6 +28,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path"
 	"sort"
 	"strings"
 	"time"
@@ -37,8 +38,13 @@ import (
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var PngCache cache.Cache
-var DisableCache = flag.Bool("disableCache", false,
-	"disables all caching, ever requested rendered on demand")
+
+var (
+	templateDir = flag.String("templateDir", "templates",
+		"directory containing HTML pages and fragments")
+	DisableCache = flag.Bool("disableCache", false,
+		"disables all caching, ever requested rendered on demand")
+)
 
 type CachedPng struct {
 	Timestamp time.Time
@@ -70,7 +76,7 @@ func init() {
 }
 
 func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
-	t, err := template.ParseFiles(fmt.Sprintf("templates/%s.html", fracType))
+	t, err := template.ParseFiles(fmt.Sprintf("%s/%s.html", *templateDir, fracType))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -163,7 +169,7 @@ func IndexHander(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("templates/index.html")
+	t, err := template.ParseFiles(path.Join(*templateDir, "index.html"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

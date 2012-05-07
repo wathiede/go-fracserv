@@ -2,46 +2,47 @@
 package main
 
 import (
+	"code.google.com/p/go-fracserv/fracserv"
 	"flag"
 	"fmt"
-	"code.google.com/p/go-fracserv/fracserv"
-	"log"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 )
 
-var port string
-var cacheDir string
-
-func init() {
-	flag.StringVar(&port, "port", "8000", "webserver listen port")
-	flag.StringVar(&cacheDir, "cacheDir", "/tmp/fractals",
+var (
+	port     = flag.Int("port", 8000, "webserver listen port")
+	cacheDir = flag.String("cacheDir", "/tmp/fractals",
 		"directory to store rendered tiles. Directory must exist")
-	flag.Parse()
-}
+	staticDir = flag.String("staticDir", "static",
+		"directory containg statically served web page resources, i.e. javascript, css and image files")
+)
 
 func main() {
-	s := "static/"
+	flag.Parse()
+
+	s := *staticDir
 	_, err := os.Stat(s)
 	if os.IsNotExist(err) {
 		log.Fatalf("Directory %s not found, please run for directory containing %s\n", s, s)
 	}
 	// Setup handler for js, img, css files
-	http.Handle("/"+s, http.StripPrefix("/"+s, http.FileServer(http.Dir(s))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(s))))
 
 	fmt.Printf("Listening on:\n")
 	host, err := os.Hostname()
 	if err != nil {
 		log.Fatal("Failed to get hostname from os:", err)
 	}
-	fmt.Printf("  http://%s:%s/\n", host, port)
+	fmt.Printf("  http://%s:%d/\n", host, *port)
 
 	go loadCache()
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*port), nil))
 }
 
 func loadCache() {
@@ -50,7 +51,7 @@ func loadCache() {
 		return
 	}
 
-	files, err := filepath.Glob(cacheDir + "/*/*")
+	files, err := filepath.Glob(path.Join(*cacheDir, "*/*"))
 	if err != nil {
 		log.Printf("Error globing cachedir %q: %s", cacheDir, err)
 	}
@@ -84,7 +85,7 @@ func savePngFromCache(cacheKey string) {
 		return
 	}
 
-	cachefn := cacheDir + cacheKey
+	cachefn := path.Join(*cacheDir, cacheKey)
 	d := path.Dir(cachefn)
 	if _, err := os.Stat(d); err != nil {
 		log.Printf("Creating cache dir for %q", d)
@@ -112,4 +113,3 @@ func savePngFromCache(cacheKey string) {
 		log.Printf("Error setting atime and mtime on %q: %s", cachefn, err)
 	}
 }
-
