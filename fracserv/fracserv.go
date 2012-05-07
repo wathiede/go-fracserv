@@ -37,7 +37,7 @@ import (
 
 var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var PngCache cache.Cache
-var DisableCache = flag.Bool("DisableCache", false,
+var DisableCache = flag.Bool("disableCache", false,
 	"disables all caching, ever requested rendered on demand")
 
 type CachedPng struct {
@@ -50,8 +50,6 @@ func (c CachedPng) Size() int {
 }
 
 func init() {
-	flag.Parse()
-
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
 		"debug":      debug.NewFractal,
 		"solid":      solid.NewFractal,
