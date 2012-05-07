@@ -15,3 +15,5 @@ popd
 
 find ..  -maxdepth 1 -mindepth 1 -type d -not \( -name .git -o -name standalone -o -name gae -o -name lnp \) -exec ./linker.sh {} \;
 ln -nsf ../fracserv/templates/ templates
+# Pending a more long term solution from the SDK, remove problematic files:
+rm code.google.com/p/freetype-go/example/round/main.go
