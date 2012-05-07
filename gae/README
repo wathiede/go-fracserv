@@ -1,0 +1,4 @@
+Run the setup.sh script in this directory to prepare a file tree that can be
+used for dev_appengine.py and appcfg.py.  This creates a symlink forest into
+the other directories in go-fracserv to get around appengine's create
+limitations with not supporting GOPATH.
