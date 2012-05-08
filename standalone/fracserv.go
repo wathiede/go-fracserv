@@ -71,7 +71,10 @@ func loadCache() {
 		if err != nil {
 			log.Printf("Error reading tile %q: %s", fn, err)
 		}
-		cacher := fracserv.CachedPng{s.ModTime(), b}
+		cacher := fracserv.CachedPng{
+			Timestamp: s.ModTime(),
+			Bytes: b,
+		}
 		fracserv.PngCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
 	}
 	log.Printf("Loaded %d cached tiles.", len(files))

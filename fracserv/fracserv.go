@@ -107,7 +107,9 @@ func fsNameFromURL(u *url.URL) string {
 
 func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	if *DisableCache {
-		i, err := factory[fracType](fractal.Options{req.URL.Query()})
+		i, err := factory[fracType](fractal.Options{
+			Values: req.URL.Query(),
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -120,7 +122,9 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	cacher, ok := PngCache.Get(cacheKey)
 	if !ok {
 		// No png in cache, create one
-		i, err := factory[fracType](fractal.Options{req.URL.Query()})
+		i, err := factory[fracType](fractal.Options{
+			Values: req.URL.Query(),
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

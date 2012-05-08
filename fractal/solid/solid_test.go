@@ -22,7 +22,7 @@ import (
 
 func TestColor(t *testing.T) {
 	o := fractal.Options{
-		url.Values{
+		Values: url.Values{
 			"w": []string{"10"},
 			"h": []string{"10"},
 			"c": []string{"224488"},
@@ -52,7 +52,7 @@ func TestColor(t *testing.T) {
 
 func TestDimension(t *testing.T) {
 	o := fractal.Options{
-		url.Values{
+		Values: url.Values{
 			"w": []string{"10"},
 			"h": []string{"10"},
 			"c": []string{"224488"},

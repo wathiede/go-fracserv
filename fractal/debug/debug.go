@@ -16,6 +16,7 @@ package debug
 import (
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/go-fracserv/fractal"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -23,6 +24,8 @@ import (
 	"math/rand"
 	"sort"
 )
+
+var fontFn = flag.String("fontFn", "", "path to TTF formatted font file")
 
 type Debug struct {
 	image.RGBA
@@ -54,7 +57,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 	}
 
 	// Read the font data.
-	fontBytes, err := ioutil.ReadFile("static/fonts/ProggyClean.ttf")
+	fontBytes, err := ioutil.ReadFile(*fontFn)
 	if err != nil {
 		return nil, err
 	}
