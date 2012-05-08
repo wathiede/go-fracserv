@@ -73,7 +73,7 @@ func loadCache() {
 		}
 		cacher := fracserv.CachedPng{
 			Timestamp: s.ModTime(),
-			Bytes: b,
+			Bytes:     b,
 		}
 		fracserv.PngCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
 	}
