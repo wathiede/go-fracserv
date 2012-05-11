@@ -22,6 +22,7 @@ import (
 	"fractal/debug"
 	"fractal/julia"
 	"fractal/mandelbrot"
+	"fractal/perlin"
 	"fractal/solid"
 	"html/template"
 	"image/png"
@@ -67,6 +68,7 @@ func init() {
 		"solid":      solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
 		"julia":      julia.NewFractal,
+		"perlin":     perlin.NewFractal,
 		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
