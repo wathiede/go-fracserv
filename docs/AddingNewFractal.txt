@@ -1,0 +1,14 @@
+To add a new fractal type follow the following simple steps:
+
+- Create a new subdir under fractal/, i.e. fractal/newfractal/
+- Copying fractal/example/example.go fractal/newfractal/newfractal.go
+- Search and replace example with newfractal, implement your fractal's formula
+in ComputeMembership
+- In fracserv/fracserv.go:
+  - Add an import for your new fractal type
+  - Add an extry in the factory map setup in init()
+- Add an html fragment in fracserv/templates/ for the form that allows you to
+set any parameters for your fractal, see fracserv/templates/example.html
+
+You should be able to run standalone/ and see your new fractal type as a
+choice in the top bar, congrats!

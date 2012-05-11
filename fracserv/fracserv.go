@@ -18,6 +18,7 @@ import (
 	"code.google.com/p/go-fracserv/cache"
 	"code.google.com/p/go-fracserv/fractal"
 	"code.google.com/p/go-fracserv/fractal/debug"
+	"code.google.com/p/go-fracserv/fractal/example"
 	"code.google.com/p/go-fracserv/fractal/julia"
 	"code.google.com/p/go-fracserv/fractal/mandelbrot"
 	"code.google.com/p/go-fracserv/fractal/solid"
@@ -58,6 +59,7 @@ func (c CachedPng) Size() int {
 func init() {
 	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
 		"debug":      debug.NewFractal,
+		"example":    example.NewFractal,
 		"solid":      solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
 		"julia":      julia.NewFractal,
