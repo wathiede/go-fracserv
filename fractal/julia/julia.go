@@ -16,12 +16,11 @@
 package julia
 
 import (
+	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
-	"fractal"
 	"image"
 	"image/color"
 	"math/cmplx"
-	"runtime"
 )
 
 type Method int
@@ -65,15 +64,12 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       work with our math
 	//   +7: The zoom factor is converted to 2^z, so having a zoom factor of 7
 	//       (128x) makes the fractal range comfortably visible in pixel space
-	nav := fractal.NewDefaultNavigator(float64(z+1+6), x*w, y*h)
+	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
 	return &Julia{*image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, mu, method}, nil
 }
 
 func (j *Julia) ColorIndexAt(x, y int) uint8 {
-	defer func() {
-		runtime.Gosched()
-	}()
 	r, i := j.Transform(image.Pt(x, y))
 
 	return j.ComputeMembership(r, i)
@@ -81,18 +77,18 @@ func (j *Julia) ColorIndexAt(x, y int) uint8 {
 
 func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	/*
-	For every point (x,y) in your view rectangle 
-	  Let z=x+yi
-	  Set n=0
-	  While(n less than limit and |z|<2)
-	    Let z=z*z+mu
-	    Increment n
-	  End While
-	  if(|z|<2) then z is a member of the approximate 
-	    Julia set, plot (x,y) in the Julia set color
-	  otherwise z is outside the Julia set, 
-	    plot (x,y) in the outside color.
-	End for
+		For every point (x,y) in your view rectangle 
+		  Let z=x+yi
+		  Set n=0
+		  While(n less than limit and |z|<2)
+		    Let z=z*z+mu
+		    Increment n
+		  End While
+		  if(|z|<2) then z is a member of the approximate 
+		    Julia set, plot (x,y) in the Julia set color
+		  otherwise z is outside the Julia set, 
+		    plot (x,y) in the outside color.
+		End for
 
 	*/
 	z := complex(r, i)
@@ -102,20 +98,20 @@ func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	case method_unset:
 		panic("Julia method not set")
 	case method_zSquared:
-		for (cmplx.Abs(z) < 2) && (it < j.maxIterations) {
+		for fractal.AbsLessThan(z, 2) && (it < j.maxIterations) {
 			z = z*z + j.mu
 			it++
 		}
-		if cmplx.Abs(z) < 2 {
+		if fractal.AbsLessThan(z, 2) {
 			// Pixel in julia set, return black
 			return 0
 		}
 	case method_consine:
-		for (cmplx.Abs(z) < 12) && (it < j.maxIterations) {
+		for fractal.AbsLessThan(z, 12) && (it < j.maxIterations) {
 			z = cmplx.Cos(z) + j.mu
 			it++
 		}
-		if cmplx.Abs(z) < 12 {
+		if fractal.AbsLessThan(z, 12) {
 			// Pixel in julia set, return black
 			return 0
 		}
