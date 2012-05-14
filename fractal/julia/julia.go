@@ -113,7 +113,7 @@ func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	case method_zSquared:
 		for fractal.AbsLessThan(z, j.threshold) && (it < j.maxIterations) {
 			z = cmplx.Pow(z, j.exponent) + j.mu
-			//z = z*z + j.mu
+			// TODO(wathiede) accelerate common case like: z = z*z + mu
 			it++
 		}
 		if fractal.AbsLessThan(z, j.threshold) {
