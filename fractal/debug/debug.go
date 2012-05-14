@@ -25,6 +25,10 @@ import (
 	"sort"
 )
 
+func init() {
+	fractal.Register("debug", NewFractal)
+}
+
 var fontFn = flag.String("fontFn", "", "path to TTF formatted font file")
 
 type Debug struct {

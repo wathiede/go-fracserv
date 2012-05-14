@@ -22,6 +22,10 @@ import (
 	"math/cmplx"
 )
 
+func init() {
+	fractal.Register("mandelbrot", NewFractal)
+}
+
 type Mandelbrot struct {
 	image.Paletted
 	fractal.DefaultNavigator

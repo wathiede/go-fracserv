@@ -24,6 +24,10 @@ import (
 	"math"
 )
 
+func init() {
+	fractal.Register("perlin", NewFractal)
+}
+
 type Perlin struct {
 	image.Gray
 	fractal.DefaultNavigator

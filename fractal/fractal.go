@@ -22,6 +22,20 @@ import (
 	"strconv"
 )
 
+var fractals map[string]FractalNew = make(map[string]FractalNew)
+
+type FractalNew func(o Options) (Fractal, error)
+
+func Register(name string, newFunc FractalNew) {
+	fractals[name] = newFunc
+}
+
+func Do(f func(name string, newFunc FractalNew)) {
+	for k, v := range fractals {
+		f(k, v)
+	}
+}
+
 type Options struct {
 	url.Values
 }

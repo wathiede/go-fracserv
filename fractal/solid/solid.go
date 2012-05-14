@@ -20,6 +20,10 @@ import (
 	"image/color"
 )
 
+func init() {
+	fractal.Register("solid", NewFractal)
+}
+
 type Solid struct {
 	image.Uniform
 	Rect image.Rectangle

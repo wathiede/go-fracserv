@@ -25,6 +25,10 @@ import (
 	"math"
 )
 
+func init() {
+	fractal.Register("example", NewFractal)
+}
+
 type Example struct {
 	image.Paletted
 	fractal.DefaultNavigator

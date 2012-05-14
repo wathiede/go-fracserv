@@ -17,11 +17,13 @@ import (
 	"bytes"
 	"code.google.com/p/go-fracserv/cache"
 	"code.google.com/p/go-fracserv/fractal"
-	"code.google.com/p/go-fracserv/fractal/debug"
-	"code.google.com/p/go-fracserv/fractal/julia"
-	"code.google.com/p/go-fracserv/fractal/mandelbrot"
-	"code.google.com/p/go-fracserv/fractal/perlin"
-	"code.google.com/p/go-fracserv/fractal/solid"
+	// Handy tile type that draws text for query parameters on tile
+	//_ "code.google.com/p/go-fracserv/fractal/debug"
+	_ "code.google.com/p/go-fracserv/fractal/julia"
+	_ "code.google.com/p/go-fracserv/fractal/mandelbrot"
+	_ "code.google.com/p/go-fracserv/fractal/perlin"
+	// Illustrates basic parameter handling
+	//_ "code.google.com/p/go-fracserv/fractal/solid"
 	"flag"
 	"fmt"
 	"html/template"
@@ -37,7 +39,6 @@ import (
 	_ "net/http/pprof"
 )
 
-var factory map[string]func(o fractal.Options) (fractal.Fractal, error)
 var PngCache cache.Cache
 
 var (
@@ -57,27 +58,19 @@ func (c CachedPng) Size() int {
 }
 
 func init() {
-	factory = map[string]func(o fractal.Options) (fractal.Fractal, error){
-		"debug":      debug.NewFractal,
-		"solid":      solid.NewFractal,
-		"mandelbrot": mandelbrot.NewFractal,
-		"julia":      julia.NewFractal,
-		"perlin":     perlin.NewFractal,
-		//"lyapunov": lyapunov.NewFractal,
-	}
-
 	PngCache = *cache.NewCache()
 
 	// Register a handler per known fractal type
-	for k, _ := range factory {
-		http.HandleFunc("/"+k, FracHandler)
-	}
+	fractal.Do(func(name string, newFunc fractal.FractalNew) {
+		log.Print("Registering ", name)
+		http.HandleFunc("/"+name, FracHandlerNew(name, newFunc))
+	})
 	// Catch-all handler, just serves homepage at "/", or 404s
 	http.HandleFunc("/", IndexHander)
 }
 
-func drawFractalPage(w http.ResponseWriter, req *http.Request, fracType string) {
-	t, err := template.ParseFiles(fmt.Sprintf("%s/%s.html", *templateDir, fracType))
+func drawFractalPage(w http.ResponseWriter, req *http.Request, name string) {
+	t, err := template.ParseFiles(fmt.Sprintf("%s/%s.html", *templateDir, name))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -106,11 +99,9 @@ func fsNameFromURL(u *url.URL) string {
 	return fn + strings.Join(p, ",")
 }
 
-func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
+func drawFractal(w http.ResponseWriter, req *http.Request, newFunc fractal.FractalNew) {
 	if *DisableCache {
-		i, err := factory[fracType](fractal.Options{
-			Values: req.URL.Query(),
-		})
+		i, err := newFunc(fractal.Options{Values: req.URL.Query()})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -123,9 +114,7 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	cacher, ok := PngCache.Get(cacheKey)
 	if !ok {
 		// No png in cache, create one
-		i, err := factory[fracType](fractal.Options{
-			Values: req.URL.Query(),
-		})
+		i, err := newFunc(fractal.Options{Values: req.URL.Query()})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -154,15 +143,17 @@ func drawFractal(w http.ResponseWriter, req *http.Request, fracType string) {
 	w.Write(cp.Bytes)
 }
 
-func FracHandler(w http.ResponseWriter, req *http.Request) {
-	fracType := req.URL.Path[1:]
-	if fracType != "" {
-		//log.Println("Found fractal type", fracType)
+func FracHandlerNew(name string, newFunc fractal.FractalNew) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fracType := req.URL.Path[1:]
+		if fracType != "" {
+			//log.Println("Found fractal type", fracType)
 
-		if len(req.URL.Query()) != 0 {
-			drawFractal(w, req, fracType)
-		} else {
-			drawFractalPage(w, req, fracType)
+			if len(req.URL.Query()) != 0 {
+				drawFractal(w, req, newFunc)
+			} else {
+				drawFractalPage(w, req, name)
+			}
 		}
 	}
 }
@@ -179,7 +170,11 @@ func IndexHander(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, factory)
+	fractals := []string{}
+	fractal.Do(func(name string, _ fractal.FractalNew) {
+		fractals = append(fractals, name)
+	})
+	err = t.Execute(w, fractals)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

@@ -23,6 +23,10 @@ import (
 	"math/cmplx"
 )
 
+func init() {
+	fractal.Register("julia", NewFractal)
+}
+
 type Method int
 
 const (
