@@ -35,8 +35,10 @@ type Julia struct {
 	image.Paletted
 	maxIterations int
 	fractal.DefaultNavigator
-	mu     complex128
-	method Method
+	exponent complex128
+	mu        complex128
+	method    Method
+	threshold float64
 }
 
 func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
@@ -44,9 +46,13 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	mu_r := opt.GetFloat64Default("mu_r", 0.36237)
 	mu_i := opt.GetFloat64Default("mu_i", 0.32)
 	mu := complex(mu_r, mu_i)
+	exponent_r := opt.GetFloat64Default("exponent_r", 2)
+	exponent_i := opt.GetFloat64Default("exponent_i", 0)
+	exponent := complex(exponent_r, exponent_i)
 	method := Method(opt.GetIntDefault("method", 1))
 	w := opt.GetIntDefault("w", 256)
 	h := opt.GetIntDefault("h", 256)
+	t := opt.GetFloat64Default("t", 2)
 	x := opt.GetIntDefault("x", 0)
 	y := opt.GetIntDefault("y", 0)
 	z := opt.GetIntDefault("z", 0)
@@ -65,8 +71,15 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//   +7: The zoom factor is converted to 2^z, so having a zoom factor of 7
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
-	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Julia{*image.NewPaletted(image.Rect(0, 0, w, h), p), it, nav, mu, method}, nil
+	return &Julia{
+		image.Paletted:           *image.NewPaletted(image.Rect(0, 0, w, h), p),
+		maxIterations:            it,
+		fractal.DefaultNavigator: nav,
+		exponent:                 exponent,
+		mu:                       mu,
+		method:                   method,
+		threshold:                t,
+	}, nil
 }
 
 func (j *Julia) ColorIndexAt(x, y int) uint8 {
@@ -98,20 +111,21 @@ func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	case method_unset:
 		panic("Julia method not set")
 	case method_zSquared:
-		for fractal.AbsLessThan(z, 2) && (it < j.maxIterations) {
-			z = z*z + j.mu
+		for fractal.AbsLessThan(z, j.threshold) && (it < j.maxIterations) {
+			z = cmplx.Pow(z, j.exponent) + j.mu
+			//z = z*z + j.mu
 			it++
 		}
-		if fractal.AbsLessThan(z, 2) {
+		if fractal.AbsLessThan(z, j.threshold) {
 			// Pixel in julia set, return black
 			return 0
 		}
 	case method_consine:
-		for fractal.AbsLessThan(z, 12) && (it < j.maxIterations) {
+		for fractal.AbsLessThan(z, j.threshold) && (it < j.maxIterations) {
 			z = cmplx.Cos(z) + j.mu
 			it++
 		}
-		if fractal.AbsLessThan(z, 12) {
+		if fractal.AbsLessThan(z, j.threshold) {
 			// Pixel in julia set, return black
 			return 0
 		}
