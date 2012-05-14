@@ -20,6 +20,7 @@ import (
 	"code.google.com/p/go-fracserv/fractal/debug"
 	"code.google.com/p/go-fracserv/fractal/julia"
 	"code.google.com/p/go-fracserv/fractal/mandelbrot"
+	"code.google.com/p/go-fracserv/fractal/perlin"
 	"code.google.com/p/go-fracserv/fractal/solid"
 	"flag"
 	"fmt"
@@ -61,6 +62,7 @@ func init() {
 		"solid":      solid.NewFractal,
 		"mandelbrot": mandelbrot.NewFractal,
 		"julia":      julia.NewFractal,
+		"perlin":     perlin.NewFractal,
 		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
