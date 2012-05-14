@@ -63,7 +63,6 @@ func init() {
 		"mandelbrot": mandelbrot.NewFractal,
 		"julia":      julia.NewFractal,
 		"perlin":     perlin.NewFractal,
-		//"glynn": glynn.NewFractal,
 		//"lyapunov": lyapunov.NewFractal,
 	}
 

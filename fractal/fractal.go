@@ -30,7 +30,7 @@ type Options struct {
 func (o Options) GetIntDefault(k string, d int) int {
 	v, err := strconv.Atoi(o.Get(k))
 	if err != nil {
-		log.Printf("Failed to parse %s: %s", o.Get(k), err)
+		log.Printf("Failed to parse %s=%s: %s", k, o.Get(k), err)
 		return d
 	}
 	return v
@@ -39,7 +39,7 @@ func (o Options) GetIntDefault(k string, d int) int {
 func (o Options) GetFloat64Default(k string, d float64) float64 {
 	v, err := strconv.ParseFloat(o.Get(k), 64)
 	if err != nil {
-		log.Printf("Failed to parse %s: %s", o.Get(k), err)
+		log.Printf("Failed to parse %s=%s: %s", k, o.Get(k), err)
 		return d
 	}
 	return v
