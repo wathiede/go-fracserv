@@ -18,18 +18,18 @@ package perlin
 
 import (
 	"code.google.com/p/go-fracserv/fractal"
-	"log"
 	"image"
 	"image/color"
+	"log"
 	"math"
 )
 
 type Perlin struct {
 	image.Gray
 	fractal.DefaultNavigator
-	octaves int
+	octaves     int
 	persistence float64
-	noise image.Gray
+	noise       image.Gray
 }
 
 func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
@@ -50,11 +50,11 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 
 	nav := fractal.NewDefaultNavigator(uint(z), x*w, y*h)
 	return &Perlin{
-		image.Gray: *image.NewGray(image.Rect(0, 0, w, h)),
+		image.Gray:               *image.NewGray(image.Rect(0, 0, w, h)),
 		fractal.DefaultNavigator: nav,
-		octaves: octaves,
-		persistence: persistence,
-		noise: *image.NewGray(image.Rect(0, 0, w, h)),
+		octaves:                  octaves,
+		persistence:              persistence,
+		noise:                    *image.NewGray(image.Rect(0, 0, w, h)),
 	}, nil
 }
 
@@ -124,26 +124,26 @@ func linearInterpolate(a, b, x float64) float64 {
 	case x < 0, x > 1:
 		log.Printf("x out of range for %f, %f: %f", a, b, x)
 	}
-	return  a*(1-x) + b*x
+	return a*(1-x) + b*x
 }
 
 func cosineInterpolate(a, b, x float64) float64 {
 	ft := x * math.Pi
 	f := (1 - math.Cos(ft)) * .5
 
-	return  a*(1-f) + b*f
+	return a*(1-f) + b*f
 }
 
 func noise(x, y float64) float64 {
-	n := int(x + y * 57)
+	n := int(x + y*57)
 
-	return  1 - float64((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0
+	return 1 - float64((n*(n*n*15731+789221)+1376312589)&0x7fffffff)/1073741824.0
 }
 
 func smoothedNoise(x, y float64) float64 {
-	corners := ( noise(x-1, y-1)+noise(x+1, y-1)+noise(x-1, y+1)+noise(x+1, y+1) ) / 16
-	sides   := ( noise(x-1, y)  +noise(x+1, y)  +noise(x, y-1)  +noise(x, y+1) ) /  8
-	center  :=  noise(x, y) / 4
+	corners := (noise(x-1, y-1) + noise(x+1, y-1) + noise(x-1, y+1) + noise(x+1, y+1)) / 16
+	sides := (noise(x-1, y) + noise(x+1, y) + noise(x, y-1) + noise(x, y+1)) / 8
+	center := noise(x, y) / 4
 	return corners + sides + center
 }
 
@@ -154,15 +154,15 @@ func interpolatedNoise(x, y float64) float64 {
 	ix, fx := math.Modf(x)
 	iy, fy := math.Modf(y)
 
-	v1 := smoothedNoise(ix,     iy)
-	v2 := smoothedNoise(ix + 1, iy)
-	v3 := smoothedNoise(ix,     iy + 1)
-	v4 := smoothedNoise(ix + 1, iy + 1)
+	v1 := smoothedNoise(ix, iy)
+	v2 := smoothedNoise(ix+1, iy)
+	v3 := smoothedNoise(ix, iy+1)
+	v4 := smoothedNoise(ix+1, iy+1)
 
-	i1 := interpolate(v1 , v2 , fx)
-	i2 := interpolate(v3 , v4 , fx)
+	i1 := interpolate(v1, v2, fx)
+	i2 := interpolate(v3, v4, fx)
 
-	return interpolate(i1 , i2 , fy)
+	return interpolate(i1, i2, fy)
 }
 
 func (p *Perlin) perlinNoise2D(x, y float64) color.Gray {
@@ -172,7 +172,7 @@ func (p *Perlin) perlinNoise2D(x, y float64) color.Gray {
 		frequency := float64(uint(1) << uint(i))
 		amplitude := math.Pow(p.persistence, float64(i))
 
-		total = total + interpolatedNoise(x * frequency, y * frequency) * amplitude
+		total = total + interpolatedNoise(x*frequency, y*frequency)*amplitude
 	}
 	total = (total + 1) / 2
 

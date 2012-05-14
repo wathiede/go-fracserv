@@ -47,24 +47,24 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 
 func (g *Glynn) ColorIndexAt(x, y int) uint8 {
 	/*
-	Choose the parameter  mu=a+bi
+		Choose the parameter  mu=a+bi
 
-	Pick a Glynn exponent, e.g. e=1.5.
+		Pick a Glynn exponent, e.g. e=1.5.
 
-	Pick an iteration cutoff limit.
+		Pick an iteration cutoff limit.
 
-	For every point (x,y) in your view rectangle 
-	  Let z=x+yi
-	  Set n=0
-	  While(n less than limit and |z|<4)
-	    Let z=z^e+mu
-	    Increment n
-	  End While
-	  if(|z|<2) then z is a member of the approximate 
-	    Glynn fractal, plot (x,y) in the Julia set color
-	  otherwise z is outside the Glynn fractal, 
-	    plot (x,y) in the outside color.
-	End for
+		For every point (x,y) in your view rectangle 
+		  Let z=x+yi
+		  Set n=0
+		  While(n less than limit and |z|<4)
+		    Let z=z^e+mu
+		    Increment n
+		  End While
+		  if(|z|<2) then z is a member of the approximate 
+		    Glynn fractal, plot (x,y) in the Julia set color
+		  otherwise z is outside the Glynn fractal, 
+		    plot (x,y) in the outside color.
+		End for
 	*/
 	r, i := g.Transform(image.Pt(x, y))
 	z := complex(r, i)

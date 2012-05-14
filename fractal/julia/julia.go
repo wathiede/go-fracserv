@@ -35,7 +35,7 @@ type Julia struct {
 	image.Paletted
 	maxIterations int
 	fractal.DefaultNavigator
-	exponent complex128
+	exponent  complex128
 	mu        complex128
 	method    Method
 	threshold float64
