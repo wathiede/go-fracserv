@@ -93,6 +93,8 @@ func (b *Bookmarks) Save(fn string) error {
 }
 
 func (b *Bookmarks) Loop() {
+	// TODO(wathiede) if this is called from init, it won't get the path
+	// specified by flag.bookmarkFn
 	err := b.Load(*bookmarkFn)
 	if err != nil {
 		log.Print("Error loading bookmarks ", err)
