@@ -133,7 +133,7 @@ func drawFractal(w http.ResponseWriter, req *http.Request, newFunc fractal.Fract
 	cp := cacher.(CachedPng)
 
 	// Set expire time
-	req.Header.Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
+	w.Header().Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
 	// Using this instead of io.Copy, sets Last-Modified which helps given
 	// the way the maps API makes lots of re-requests
 	w.Header().Set("Content-Type", "image/png")
@@ -174,6 +174,8 @@ func IndexHander(w http.ResponseWriter, req *http.Request) {
 	fractal.Do(func(name string, _ fractal.FractalNew) {
 		fractals = append(fractals, name)
 	})
+	sort.Strings(fractals)
+
 	err = t.Execute(w, fractals)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

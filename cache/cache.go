@@ -30,15 +30,11 @@ type Cache struct {
 	mu   sync.RWMutex
 }
 
-var cacheStats *expvar.Map
-var cacheSizeBytes *expvar.Int
-var cacheSizeCount *expvar.Int
-
-func init() {
+var (
 	cacheStats = expvar.NewMap("cache-stats")
 	cacheSizeBytes = expvar.NewInt("cache-size-bytes")
 	cacheSizeCount = expvar.NewInt("cache-size-count")
-}
+)
 
 func NewCache() *Cache {
 	return &Cache{cacheMap{}, 0, sync.RWMutex{}}
@@ -63,6 +59,13 @@ func (c *Cache) Get(key string) (Cacher, bool) {
 		cacheStats.Add("miss", 1)
 	}
 	return d, ok
+}
+
+// This may be an unstable interface and could go away or be moved
+func (c *Cache) Do(f func(key string, value Cacher)) {
+	for k, v := range c.data {
+		f(k, v)
+	}
 }
 
 func (c *Cache) Del(key string) {

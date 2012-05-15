@@ -88,7 +88,7 @@ function initialize(mapTypeName) {
 			z: map.getZoom(),
 		};
 		// Add any form elements to request
-		$('form input').each(function(idx, e) {
+		$('#config form input').each(function(idx, e) {
 			options[e.id] =  e.value;
 		});
 		return "#" + mapTypeName + "?" + serializeArray(options);

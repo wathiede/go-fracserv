@@ -109,6 +109,7 @@ var map;
 			$('#share-modal #share-url a')
 				.html(url)
 				.attr('href', url);
+			$('#share-modal form input#url').val(map.fracSave());
 
 			$('#share-modal').modal('show');
 		});
@@ -119,14 +120,36 @@ var map;
 			console.log(fracType);
 			getContents(fracType);
 			$('#masthead').fadeOut();
+			$('#favs-container').fadeOut();
 			$('#mobile-jump').fadeOut();
 			$('#config').fadeIn();
 		});
+		var favsLoad = function() {
+			$.get('/bookmarks', function(data) {
+				if(data.length != 0) {
+					$.each(data, function() {
+						$('ul#favs').append('<li><a href="' + this.url + '">'
+							+ this.name + '</a></li>');
+					});
+					$('#favs-container').fadeIn();
+				}
+			});
+		};
 
 		var fracLoad = function() {
 			var fracType = location.hash.split('?')[0];
-			$(fracType).click();
+			if(fracType.length != 0) {
+				$(fracType).click();
+			} else {
+				favsLoad();
+			}
 		};
 		fracLoad();
+		$(window).bind('hashchange', function() {
+			if(-1 != location.hash.indexOf('?')) {
+				// Only reload if we're at a url that has a parameters
+				fracLoad();
+			}
+		});
 	})
 }( window.jQuery );
