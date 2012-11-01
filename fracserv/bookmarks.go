@@ -14,10 +14,10 @@
 package fracserv
 
 import (
-	"encoding/json"
 	"encoding/gob"
-	"log"
+	"encoding/json"
 	"flag"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -40,21 +40,21 @@ func init() {
 }
 
 type Bookmark struct {
-	Name string `json:"name"`
-	Url string `json:"url"`
+	Name  string    `json:"name"`
+	Url   string    `json:"url"`
 	Added time.Time `json:"added"`
 }
 
 type Bookmarks struct {
 	Bookmarks []Bookmark
-	addCh chan Bookmark
-	mu   sync.RWMutex
+	addCh     chan Bookmark
+	mu        sync.RWMutex
 }
 
 func NewBookmarks() *Bookmarks {
 	b := &Bookmarks{
 		Bookmarks: make([]Bookmark, 0),
-		addCh: make(chan Bookmark, 1),
+		addCh:     make(chan Bookmark, 1),
 	}
 	go b.Loop()
 	return b
@@ -81,7 +81,7 @@ func (b *Bookmarks) Load(fn string) error {
 
 func (b *Bookmarks) Save(fn string) error {
 	log.Print("Saving bookmarks to ", fn)
-	f, err := os.OpenFile(fn, os.O_WRONLY | os.O_CREATE, 0644)
+	f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -117,13 +117,13 @@ func (b *Bookmarks) AddHandler(w http.ResponseWriter, req *http.Request) {
 	name := q.Get("name")
 	url := q.Get("url")
 	if url == "" || name == "" {
-		http.Error(w, "missing url or name: " + req.URL.String(),
+		http.Error(w, "missing url or name: "+req.URL.String(),
 			http.StatusInternalServerError)
 		return
 	}
 	b.Add(Bookmark{
-		Name: q.Get("name"),
-		Url: q.Get("url"),
+		Name:  q.Get("name"),
+		Url:   q.Get("url"),
 		Added: time.Now(),
 	})
 
