@@ -16,10 +16,10 @@
 package mandelbrot
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
-	"math/cmplx"
+
+	"code.google.com/p/go-fracserv/fractal"
 )
 
 func init() {
@@ -72,7 +72,7 @@ func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 	w := complex(0, 0)
 	// Start at -1 so the first escaped values get the first color.
 	it := -1
-	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
+	for fractal.AbsLessThan(w, 2) && (it < m.maxIterations) {
 		v := w
 		for i := 1; i < m.order; i++ {
 			v *= w
@@ -82,7 +82,7 @@ func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
 		it++
 	}
 
-	if cmplx.Abs(w) < 2 {
+	if fractal.AbsLessThan(w, 2) {
 		// Pixel in mandelbrot set, return black
 		return 0
 	}
