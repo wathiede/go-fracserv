@@ -55,10 +55,29 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
 	//nav := fractal.NewDefaultNavigator(float64(z+1)*200, x + int(-float64(w)/1.75), y - h/2)
-	return &Mandelbrot{*image.NewPaletted(image.Rect(0, 0, w, h), p), nav,
-		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
+	m := &Mandelbrot{*image.NewPaletted(image.Rect(0, 0, w, h), p), nav,
+		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}
+
+	m.generate()
+
+	return m, nil
 }
 
+func (m *Mandelbrot) generate() {
+	b := m.Bounds()
+	w :=  b.Dx()
+	h :=  b.Dy()
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			off := x + y * w
+			r, i := m.Transform(image.Pt(x, y))
+			m.Pix[off] = m.ComputeMembership(r, i)
+		}
+	}
+}
+
+/*
 func (m *Mandelbrot) At(x, y int) color.Color {
 	return m.Palette[m.ColorIndexAt(x, y)]
 }
@@ -68,6 +87,7 @@ func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 
 	return m.ComputeMembership(r, i)
 }
+*/
 
 // Takes in a coordinate in fractal space, and returns an index to the proper
 // coloring for that point
