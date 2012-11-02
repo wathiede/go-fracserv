@@ -59,6 +59,10 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
 }
 
+func (m *Mandelbrot) At(x, y int) color.Color {
+	return m.Palette[m.ColorIndexAt(x, y)]
+}
+
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	r, i := m.Transform(image.Pt(x, y))
 
