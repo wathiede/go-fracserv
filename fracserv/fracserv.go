@@ -18,7 +18,7 @@ import (
 	"code.google.com/p/go-fracserv/cache"
 	"code.google.com/p/go-fracserv/fractal"
 	// Handy tile type that draws text for query parameters on tile
-	//_ "code.google.com/p/go-fracserv/fractal/debug"
+	_ "code.google.com/p/go-fracserv/fractal/debug"
 	_ "code.google.com/p/go-fracserv/fractal/julia"
 	_ "code.google.com/p/go-fracserv/fractal/mandelbrot"
 	_ "code.google.com/p/go-fracserv/fractal/perlin"
