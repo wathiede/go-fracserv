@@ -16,10 +16,10 @@
 package mandelbrot
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
-	"math/cmplx"
+
+	"code.google.com/p/go-fracserv/fractal"
 )
 
 func init() {
@@ -59,30 +59,45 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 		opt.GetIntDefault("i", 256), opt.GetIntDefault("o", 2)}, nil
 }
 
+func (m *Mandelbrot) At(x, y int) color.Color {
+	return m.Palette[m.ColorIndexAt(x, y)]
+}
+
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
 	r, i := m.Transform(image.Pt(x, y))
 
 	return m.ComputeMembership(r, i)
 }
 
+func mult(x, y, u, v float32) (r, i float32) {
+	return (x*u - y*v), (x*v + y*u)
+}
+
+func absLessThan(r, i, v float32) bool {
+	return (r*r + i*i) < (v * v)
+}
+
 // Takes in a coordinate in fractal space, and returns an index to the proper
 // coloring for that point
 func (m *Mandelbrot) ComputeMembership(r, i float64) uint8 {
-	z := complex(r, i)
-	w := complex(0, 0)
+	zr, zi := float32(r), float32(i)
+	wr, wi := float32(0), float32(0)
+
 	// Start at -1 so the first escaped values get the first color.
 	it := -1
-	for (cmplx.Abs(w) < 2) && (it < m.maxIterations) {
-		v := w
+	for absLessThan(wr, wi, 2) && (it < m.maxIterations) {
+		vr := wr
+		vi := wi
 		for i := 1; i < m.order; i++ {
-			v *= w
+			vr, vi = mult(vr, vi, wr, wi)
 		}
-		w = v + z
+		wr = vr + zr
+		wi = vi + zi
 
 		it++
 	}
 
-	if cmplx.Abs(w) < 2 {
+	if absLessThan(wr, wi, 2) {
 		// Pixel in mandelbrot set, return black
 		return 0
 	}

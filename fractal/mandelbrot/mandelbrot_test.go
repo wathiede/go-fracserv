@@ -1,7 +1,10 @@
 package mandelbrot
 
 import (
+	"image"
+	"image/jpeg"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"math"
 	"strconv"
@@ -10,7 +13,27 @@ import (
 	"code.google.com/p/go-fracserv/fractal"
 )
 
-func BenchmarkTiles(b *testing.B) {
+type encodeFunc func(w io.Writer, m image.Image)
+
+func BenchmarkTilesPng(b *testing.B) {
+	benchmarkTilesCommon(b, func(w io.Writer, m image.Image) {
+		err := png.Encode(w, m)
+		if err != nil {
+			b.Fatal(err)
+		}
+	})
+}
+
+func BenchmarkTilesJpeg(b *testing.B) {
+	benchmarkTilesCommon(b, func(w io.Writer, m image.Image) {
+		err := jpeg.Encode(w, m, nil)
+		if err != nil {
+			b.Fatal(err)
+		}
+	})
+}
+
+func benchmarkTilesCommon(b *testing.B, enc encodeFunc) {
 	// Randomly chosen tile of moderate complexity
 	// /mandelbrot?w=128&h=128&x=-44&y=2&z=5&o=2&i=50&name=&url=
 	o := fractal.NewOptions()
@@ -33,7 +56,7 @@ func BenchmarkTiles(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			png.Encode(ioutil.Discard, f)
+			enc(ioutil.Discard, f)
 		}
 	}
 }
