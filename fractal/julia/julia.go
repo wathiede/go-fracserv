@@ -76,13 +76,13 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 	//       (128x) makes the fractal range comfortably visible in pixel space
 	nav := fractal.NewDefaultNavigator(uint(z+1+6), x*w, y*h)
 	return &Julia{
-		image.Paletted:           *image.NewPaletted(image.Rect(0, 0, w, h), p),
-		maxIterations:            it,
-		fractal.DefaultNavigator: nav,
-		exponent:                 exponent,
-		mu:                       mu,
-		method:                   method,
-		threshold:                t,
+		Paletted:         *image.NewPaletted(image.Rect(0, 0, w, h), p),
+		maxIterations:    it,
+		DefaultNavigator: nav,
+		exponent:         exponent,
+		mu:               mu,
+		method:           method,
+		threshold:        t,
 	}, nil
 }
 
@@ -94,16 +94,16 @@ func (j *Julia) ColorIndexAt(x, y int) uint8 {
 
 func (j *Julia) ComputeMembership(r, i float64) uint8 {
 	/*
-		For every point (x,y) in your view rectangle 
+		For every point (x,y) in your view rectangle
 		  Let z=x+yi
 		  Set n=0
 		  While(n less than limit and |z|<2)
 		    Let z=z*z+mu
 		    Increment n
 		  End While
-		  if(|z|<2) then z is a member of the approximate 
+		  if(|z|<2) then z is a member of the approximate
 		    Julia set, plot (x,y) in the Julia set color
-		  otherwise z is outside the Julia set, 
+		  otherwise z is outside the Julia set,
 		    plot (x,y) in the outside color.
 		End for
 

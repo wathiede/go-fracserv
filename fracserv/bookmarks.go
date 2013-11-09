@@ -14,10 +14,10 @@
 package fracserv
 
 import (
-	"encoding/json"
 	"encoding/gob"
-	"log"
+	"encoding/json"
 	"flag"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -27,6 +27,7 @@ import (
 var (
 	bookmarkFn = flag.String("bookmarkFn", "/tmp/bookmark.db",
 		"location to store bookmarked links")
+	loaded = sync.Once{}
 )
 
 func init() {
@@ -40,29 +41,22 @@ func init() {
 }
 
 type Bookmark struct {
-	Name string `json:"name"`
-	Url string `json:"url"`
+	Name  string    `json:"name"`
+	Url   string    `json:"url"`
 	Added time.Time `json:"added"`
 }
 
 type Bookmarks struct {
 	Bookmarks []Bookmark
-	addCh chan Bookmark
-	mu   sync.RWMutex
+	addCh     chan Bookmark
+	mu        sync.RWMutex
 }
 
 func NewBookmarks() *Bookmarks {
-	b := &Bookmarks{
+	return &Bookmarks{
 		Bookmarks: make([]Bookmark, 0),
-		addCh: make(chan Bookmark, 1),
+		addCh:     make(chan Bookmark, 1),
 	}
-	go b.Loop()
-	return b
-}
-
-func (b *Bookmarks) Add(bookmark Bookmark) {
-	log.Print("Adding bookmark ", bookmark)
-	b.addCh <- bookmark
 }
 
 func (b *Bookmarks) Load(fn string) error {
@@ -81,7 +75,7 @@ func (b *Bookmarks) Load(fn string) error {
 
 func (b *Bookmarks) Save(fn string) error {
 	log.Print("Saving bookmarks to ", fn)
-	f, err := os.OpenFile(fn, os.O_WRONLY | os.O_CREATE, 0644)
+	f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -92,40 +86,39 @@ func (b *Bookmarks) Save(fn string) error {
 	return err
 }
 
-func (b *Bookmarks) Loop() {
-	// TODO(wathiede) if this is called from init, it won't get the path
-	// specified by flag.bookmarkFn
+func (b *Bookmarks) Add(bookmark Bookmark) {
+	log.Print("Adding bookmark ", bookmark)
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.Bookmarks = append(b.Bookmarks, bookmark)
+	// TODO This doesn't really scale
+	err := b.Save(*bookmarkFn)
+	if err != nil {
+		log.Print("Error saving bookmarks ", err)
+	}
+}
+
+func (b *Bookmarks) loadOnce() {
 	err := b.Load(*bookmarkFn)
 	if err != nil {
 		log.Print("Error loading bookmarks ", err)
 	}
-	for {
-		select {
-		case bookmark := <-b.addCh:
-			b.mu.Lock()
-			b.Bookmarks = append(b.Bookmarks, bookmark)
-			// TODO This doesn't really scale
-			err = b.Save(*bookmarkFn)
-			if err != nil {
-				log.Print("Error saving bookmarks ", err)
-			}
-			b.mu.Unlock()
-		}
-	}
 }
 
 func (b *Bookmarks) AddHandler(w http.ResponseWriter, req *http.Request) {
+	loaded.Do(func() { b.loadOnce() })
+
 	q := req.URL.Query()
 	name := q.Get("name")
 	url := q.Get("url")
 	if url == "" || name == "" {
-		http.Error(w, "missing url or name: " + req.URL.String(),
+		http.Error(w, "missing url or name: "+req.URL.String(),
 			http.StatusInternalServerError)
 		return
 	}
 	b.Add(Bookmark{
-		Name: q.Get("name"),
-		Url: q.Get("url"),
+		Name:  q.Get("name"),
+		Url:   q.Get("url"),
 		Added: time.Now(),
 	})
 
@@ -133,6 +126,8 @@ func (b *Bookmarks) AddHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (b *Bookmarks) ListHandler(w http.ResponseWriter, req *http.Request) {
+	loaded.Do(func() { b.loadOnce() })
+
 	w.Header().Set("Content-Type", "application/json")
 	b.mu.Lock()
 	defer b.mu.Unlock()

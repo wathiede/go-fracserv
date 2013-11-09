@@ -31,7 +31,7 @@ type Cache struct {
 }
 
 var (
-	cacheStats = expvar.NewMap("cache-stats")
+	cacheStats     = expvar.NewMap("cache-stats")
 	cacheSizeBytes = expvar.NewInt("cache-size-bytes")
 	cacheSizeCount = expvar.NewInt("cache-size-count")
 )

@@ -71,17 +71,17 @@ func loadCache() {
 		if err != nil {
 			log.Printf("Error reading tile %q: %s", fn, err)
 		}
-		cacher := fracserv.CachedPng{
+		cacher := fracserv.CachedImage{
 			Timestamp: s.ModTime(),
 			Bytes:     b,
 		}
-		fracserv.PngCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
+		fracserv.ImageCache.Add(path.Join(path.Base(path.Dir(fn)), path.Base(fn)), cacher)
 	}
 	log.Printf("Loaded %d cached tiles.", len(files))
 }
 
-func savePngFromCache(cacheKey string) {
-	cacher, ok := fracserv.PngCache.Get(cacheKey)
+func saveImageFromCache(cacheKey string) {
+	cacher, ok := fracserv.ImageCache.Get(cacheKey)
 	if !ok {
 		log.Printf("Attempt to save %q to disk, but image not in cache",
 			cacheKey)
@@ -107,7 +107,7 @@ func savePngFromCache(cacheKey string) {
 		log.Printf("Failed to open tile %q for save: %s", cachefn, err)
 		return
 	}
-	cp := cacher.(fracserv.CachedPng)
+	cp := cacher.(fracserv.CachedImage)
 	outf.Write(cp.Bytes)
 	outf.Close()
 

@@ -15,6 +15,22 @@ package fracserv
 
 import (
 	"bytes"
+	"flag"
+	"fmt"
+	"html/template"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+	"net/url"
+	"path"
+	"sort"
+	"strings"
+	"time"
+
 	"code.google.com/p/go-fracserv/cache"
 	"code.google.com/p/go-fracserv/fractal"
 	// Handy tile type that draws text for query parameters on tile
@@ -24,41 +40,42 @@ import (
 	_ "code.google.com/p/go-fracserv/fractal/perlin"
 	// Illustrates basic parameter handling
 	//_ "code.google.com/p/go-fracserv/fractal/solid"
-	"flag"
-	"fmt"
-	"html/template"
-	"image/png"
-	"log"
-	"net/http"
-	"net/url"
-	"path"
-	"sort"
-	"strings"
-	"time"
-
-	_ "net/http/pprof"
 )
 
-var PngCache cache.Cache
+var ImageCache cache.Cache
 
 var (
 	templateDir = flag.String("templateDir", "templates",
 		"directory containing HTML pages and fragments")
 	DisableCache = flag.Bool("disableCache", false,
 		"disables all caching, ever requested rendered on demand")
+	jpegTiles = flag.Bool("jpegTiles", false,
+		"render jpeg instead of png tiles")
 )
 
-type CachedPng struct {
+type CachedImage struct {
 	Timestamp time.Time
 	Bytes     []byte
 }
 
-func (c CachedPng) Size() int {
+func (c CachedImage) Size() int {
 	return len(c.Bytes)
 }
 
+func encodeImage(w io.Writer, m image.Image) error {
+	var err error
+	if *jpegTiles {
+		err = jpeg.Encode(w, m, &jpeg.Options{
+			Quality: 100,
+		})
+	} else {
+		err = png.Encode(w, m)
+	}
+	return err
+}
+
 func init() {
-	PngCache = *cache.NewCache()
+	ImageCache = *cache.NewCache()
 
 	// Register a handler per known fractal type
 	fractal.Do(func(name string, newFunc fractal.FractalNew) {
@@ -106,12 +123,16 @@ func drawFractal(w http.ResponseWriter, req *http.Request, newFunc fractal.Fract
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		png.Encode(w, i)
+		err = encodeImage(w, i)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
 	cacheKey := fsNameFromURL(req.URL)
-	cacher, ok := PngCache.Get(cacheKey)
+	cacher, ok := ImageCache.Get(cacheKey)
 	if !ok {
 		// No png in cache, create one
 		i, err := newFunc(fractal.Options{Values: req.URL.Query()})
@@ -121,22 +142,30 @@ func drawFractal(w http.ResponseWriter, req *http.Request, newFunc fractal.Fract
 		}
 
 		b := &bytes.Buffer{}
-		png.Encode(b, i)
-		cacher = CachedPng{time.Now(), b.Bytes()}
-		PngCache.Add(cacheKey, cacher)
+		err = encodeImage(b, i)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cacher = CachedImage{time.Now(), b.Bytes()}
+		ImageCache.Add(cacheKey, cacher)
 
 		// Async save image to disk
 		// TODO make this a channel and serialize saving of images
 		//go savePngFromCache(cacheKey)
 	}
 
-	cp := cacher.(CachedPng)
+	cp := cacher.(CachedImage)
 
 	// Set expire time
 	w.Header().Set("Expires", time.Now().Add(time.Hour).Format(http.TimeFormat))
 	// Using this instead of io.Copy, sets Last-Modified which helps given
 	// the way the maps API makes lots of re-requests
-	w.Header().Set("Content-Type", "image/png")
+	if *jpegTiles {
+		w.Header().Set("Content-Type", "image/jpeg")
+	} else {
+		w.Header().Set("Content-Type", "image/png")
+	}
 	w.Header().Set("Last-Modified", cp.Timestamp.Format(http.TimeFormat))
 	w.Header().Set("Expires",
 		cp.Timestamp.Add(time.Hour).Format(http.TimeFormat))

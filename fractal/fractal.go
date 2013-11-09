@@ -40,6 +40,12 @@ type Options struct {
 	url.Values
 }
 
+func NewOptions() Options {
+	return Options{
+		make(url.Values),
+	}
+}
+
 // Converts value with key 'k' to int, in absence or failure 'd' is returned
 func (o Options) GetIntDefault(k string, d int) int {
 	v, err := strconv.Atoi(o.Get(k))

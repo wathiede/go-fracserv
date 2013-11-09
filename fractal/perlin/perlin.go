@@ -54,11 +54,11 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
 
 	nav := fractal.NewDefaultNavigator(uint(z), x*w, y*h)
 	return &Perlin{
-		image.Gray:               *image.NewGray(image.Rect(0, 0, w, h)),
-		fractal.DefaultNavigator: nav,
-		octaves:                  octaves,
-		persistence:              persistence,
-		noise:                    *image.NewGray(image.Rect(0, 0, w, h)),
+		Gray:             *image.NewGray(image.Rect(0, 0, w, h)),
+		DefaultNavigator: nav,
+		octaves:          octaves,
+		persistence:      persistence,
+		noise:            *image.NewGray(image.Rect(0, 0, w, h)),
 	}, nil
 }
 
@@ -66,7 +66,7 @@ func NewFractal(opt fractal.Options) (fractal.Fractal, error) {
   function Noise1(integer x, integer y)
     n = x + y * 57
     n = (n<<13) ^ n;
-    return ( 1.0 - ( (n * (n * n * 15731 + 789221) + 1376312589) & 7fffffff) / 1073741824.0);    
+    return ( 1.0 - ( (n * (n * n * 15731 + 789221) + 1376312589) & 7fffffff) / 1073741824.0);
   end function
 
   function SmoothNoise_1(float x, float y)
