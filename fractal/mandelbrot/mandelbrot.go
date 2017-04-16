@@ -19,7 +19,7 @@ import (
 	"image"
 	"image/color"
 
-	"code.google.com/p/go-fracserv/fractal"
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {

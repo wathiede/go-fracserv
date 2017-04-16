@@ -17,11 +17,12 @@
 package perlin
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"log"
 	"math"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {

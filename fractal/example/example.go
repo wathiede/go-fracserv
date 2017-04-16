@@ -19,10 +19,11 @@
 package example
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"image/color"
 	"math"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {

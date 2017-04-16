@@ -2,7 +2,6 @@
 package main
 
 import (
-	"code.google.com/p/go-fracserv/fracserv"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +11,8 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+
+	"github.com/wathiede/go-fracserv/fracserv"
 )
 
 var (

@@ -1,5 +1,5 @@
 package appengine
 
 import (
-	_ "code.google.com/p/go-fracserv/fracserv"
+	_ "github.com/wathiede/go-fracserv/fracserv"
 )

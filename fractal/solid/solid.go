@@ -14,10 +14,11 @@
 package solid
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
 	"image"
 	"image/color"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {

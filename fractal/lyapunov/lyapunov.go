@@ -18,7 +18,6 @@
 package lyapunov
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
 	"image"
 	"image/color"
@@ -26,6 +25,8 @@ import (
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 type debugT bool

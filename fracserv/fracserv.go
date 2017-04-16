@@ -31,15 +31,15 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go-fracserv/cache"
-	"code.google.com/p/go-fracserv/fractal"
+	"github.com/wathiede/go-fracserv/cache"
+	"github.com/wathiede/go-fracserv/fractal"
 	// Handy tile type that draws text for query parameters on tile
-	//_ "code.google.com/p/go-fracserv/fractal/debug"
-	_ "code.google.com/p/go-fracserv/fractal/julia"
-	_ "code.google.com/p/go-fracserv/fractal/mandelbrot"
-	_ "code.google.com/p/go-fracserv/fractal/perlin"
+	//_ "github.com/wathiede/go-fracserv/fractal/debug"
+	_ "github.com/wathiede/go-fracserv/fractal/julia"
+	_ "github.com/wathiede/go-fracserv/fractal/mandelbrot"
+	_ "github.com/wathiede/go-fracserv/fractal/perlin"
 	// Illustrates basic parameter handling
-	//_ "code.google.com/p/go-fracserv/fractal/solid"
+	//_ "github.com/wathiede/go-fracserv/fractal/solid"
 )
 
 var ImageCache cache.Cache

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"testing"
 
-	"code.google.com/p/go-fracserv/fractal"
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 type encodeFunc func(w io.Writer, m image.Image)

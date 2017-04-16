@@ -14,10 +14,11 @@
 package solid
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"image"
 	"net/url"
 	"testing"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func TestColor(t *testing.T) {

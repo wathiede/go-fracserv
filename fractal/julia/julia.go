@@ -16,11 +16,12 @@
 package julia
 
 import (
-	"code.google.com/p/go-fracserv/fractal"
 	"fmt"
 	"image"
 	"image/color"
 	"math/cmplx"
+
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {

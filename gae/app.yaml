@@ -5,7 +5,7 @@ api_version: go1
 
 handlers:
 - url: /static
-  static_dir: code.google.com/p/go-fracserv/fracserv/static/
+  static_dir: github.com/wathiede/go-fracserv/fracserv/static/
 
 - url: /.*
   script: _go_app

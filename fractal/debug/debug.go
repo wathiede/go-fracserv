@@ -14,8 +14,6 @@
 package debug
 
 import (
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/go-fracserv/fractal"
 	"flag"
 	"fmt"
 	"image"
@@ -23,6 +21,9 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"sort"
+
+	"github.com/golang/freetype"
+	"github.com/wathiede/go-fracserv/fractal"
 )
 
 func init() {
@@ -91,7 +92,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 		if err != nil {
 			return nil, err
 		}
-		pt.Y += ft.PointToFix32(fontSize * lineSpacing)
+		pt.Y += ft.PointToFixed(fontSize * lineSpacing)
 	}
 
 	return &Debug{*im}, nil
