@@ -14,23 +14,20 @@
 package debug
 
 import (
-	"flag"
 	"fmt"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"math/rand"
 	"sort"
 
 	"github.com/golang/freetype"
 	"github.com/wathiede/go-fracserv/fractal"
+	"golang.org/x/image/font/gofont/goregular"
 )
 
 func init() {
 	fractal.Register("debug", NewFractal)
 }
-
-var fontFn = flag.String("fontFn", "", "path to TTF formatted font file")
 
 type Debug struct {
 	image.RGBA
@@ -61,12 +58,7 @@ func NewFractal(o fractal.Options) (fractal.Fractal, error) {
 		}
 	}
 
-	// Read the font data.
-	fontBytes, err := ioutil.ReadFile(*fontFn)
-	if err != nil {
-		return nil, err
-	}
-	font, err := freetype.ParseFont(fontBytes)
+	font, err := freetype.ParseFont(goregular.TTF)
 	if err != nil {
 		return nil, err
 	}
