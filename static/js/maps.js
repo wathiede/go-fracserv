@@ -11,20 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-var getUrlVars = function(url) {
+var getUrlVars = function (url) {
 	var vars = {};
 	var url;
-	if(url == undefined) {
+	if (url == undefined) {
 		url = window.location.href;
 	}
-	var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+	var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
 		vars[key] = value;
 	});
 	return vars;
 }
 
 var size = 128;
-var serializeArray = function(arr) {
+var serializeArray = function (arr) {
 	var out = new Array();
 
 	for (key in arr) {
@@ -36,8 +36,15 @@ var serializeArray = function(arr) {
 
 var zoomOut; // Placeholder for setTimeout callback
 function initialize(mapTypeName) {
+	// TODO(wathiede): set trackResize = true;
+	map = L.map('maps').setView([51.505, -0.09], 13);
+	L.tileLayer('/debug?w=128&h=128&x={x}&y={y}&z={z}&name=&url=', {
+		tileSize: 128,
+	}).addTo(map);
+	return map;
+
 	var customTypeOptions = {
-		getTileUrl: function(coord, zoom) {
+		getTileUrl: function (coord, zoom) {
 			options = {
 				w: size,
 				h: size,
@@ -46,8 +53,8 @@ function initialize(mapTypeName) {
 				z: Math.floor(zoom),
 			}
 			// Add any form elements to request
-			$('form input').each(function(idx, e) {
-				options[e.id] =  e.value;
+			$('form input').each(function (idx, e) {
+				options[e.id] = e.value;
 			});
 			return "/" + mapTypeName + "?" + serializeArray(options);
 		},
@@ -74,22 +81,22 @@ function initialize(mapTypeName) {
 	map.mapTypes.set(mapTypeName, customMapType);
 	map.setMapTypeId(mapTypeName);
 	map.panTo(myLatlng);
-	map.reload = function() {
+	map.reload = function () {
 		// Crappy hack to make redraw work
 		map.setZoom(map.getZoom() + 0.00001);
-		zoomOut = function() {
+		zoomOut = function () {
 			map.setZoom(map.getZoom() - 0.00001)
 		};
 		setTimeout("zoomOut()", 1);
 	};
-	map.fracSave = function() {
+	map.fracSave = function () {
 		options = {
 			c: map.getCenter().toUrlValue(),
 			z: map.getZoom(),
 		};
 		// Add any form elements to request
-		$('#config form input').each(function(idx, e) {
-			options[e.id] =  e.value;
+		$('#config form input').each(function (idx, e) {
+			options[e.id] = e.value;
 		});
 		return "#" + mapTypeName + "?" + serializeArray(options);
 	};

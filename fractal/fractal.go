@@ -91,6 +91,7 @@ func (n *DefaultNavigator) Transform(p image.Point) (float64, float64) {
 	x := float64(p.X + n.offset.X)
 	y := float64(p.Y + n.offset.Y)
 	z := float64(uint(1) << n.z)
+
 	return x / z, y / z
 }
 

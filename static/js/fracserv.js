@@ -11,13 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-String.prototype.capitalize = function() {
+String.prototype.capitalize = function () {
 	return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
 var map;
 
-!function( $ ) {
+!function ($) {
 
 	$(function () {
 
@@ -25,14 +25,14 @@ var map;
 			var fracParams = location.hash.split('?')[1];
 			console.log("fracParams", fracParams);
 			var urlParams = getUrlVars('?' + fracParams);
-			if('z' in urlParams) {
+			if ('z' in urlParams) {
 				map.setZoom(parseInt(urlParams.z));
 			} else {
 				console.log("Setting zoom to 0");
 				map.setZoom(0);
 			}
 
-			if('c' in urlParams) {
+			if ('c' in urlParams) {
 				var v = urlParams.c.split(',');
 				console.log("v", v);
 				var lat = parseFloat(v[0]),
@@ -43,50 +43,49 @@ var map;
 				map.panTo(center);
 			} else {
 				console.log("Centering on 0");
-				var center = new google.maps.LatLng(0, 0);
-				map.setCenter(center);
+				var center = L.latLng(0, 0);
+				map.setView(center);
 			}
 		};
 
-		var getContents = function(fracType) {
+		var getContents = function (fracType) {
 			var fracParams = location.hash.split('?')[1];
 			urlParams = getUrlVars('?' + fracParams);
 
-			$('#config-content').load('/' + fracType + ' form', function() {
+			$('#config-content').load('/' + fracType + ' form', function () {
 				var form = $('#config-content form');
 				map = initialize(fracType);
 				var emptyForm = $('input', form).length == 0;
 				$('#config').toggle(!emptyForm);
-				if(!emptyForm) {
-					$('input', form).bind('input', function() {
+				if (!emptyForm) {
+					$('input', form).bind('input', function () {
 						console.log('Form changed, redrawing');
 						map.reload();
 					});
 
-					form.submit(function() {
+					form.submit(function () {
 						console.log('Form submitted');
 						map.reload();
 						return false;
 					});
 				}
 
-				var resize = function() {
+				var resize = function () {
 					var navHeight = $('.navbar-fixed-top').height();
 					$('#maps').width($(window).width())
-							  .height($(window).height()-navHeight)
-							  .css('top', navHeight+'px');
-					google.maps.event.trigger(map, 'resize')
+						.height($(window).height() - navHeight)
+						.css('top', navHeight + 'px');
 				}
 
 				// Populate form from parameters
-				$('form input').each(function(idx, e) {
-					if(e.id in urlParams) {
+				$('form input').each(function (idx, e) {
+					if (e.id in urlParams) {
 						e.value = urlParams[e.id];
 					}
 				});
 
 				setMapLocation();
-				$(window).resize(function() {
+				$(window).resize(function () {
 					resize();
 				});
 				$('a.btn.btn-navbar').click(resize);
@@ -94,17 +93,17 @@ var map;
 				location.hash = '#' + fracType;
 			});
 		};
-		var dismiss = function() {
+		var dismiss = function () {
 			$('#config').fadeOut();
 			$('#gear').fadeIn();
 		};
 
-		var show = function() {
+		var show = function () {
 			$('#config').fadeIn();
 			$('#gear').fadeOut();
 		};
 		$('#hide').click(dismiss);
-		$('#share').click(function() {
+		$('#share').click(function () {
 			var url = location.origin + '/' + map.fracSave()
 			$('#share-modal #share-url a')
 				.html(url)
@@ -115,7 +114,7 @@ var map;
 		});
 		$('#gear').click(show);
 
-		$('ul.nav li a').click(function(e) {
+		$('ul.nav li a').click(function (e) {
 			var fracType = $(this).attr('id');
 			console.log(fracType);
 			getContents(fracType);
@@ -124,10 +123,10 @@ var map;
 			$('#mobile-jump').fadeOut();
 			$('#config').fadeIn();
 		});
-		var favsLoad = function() {
-			$.get('/bookmarks', function(data) {
-				if(data.length != 0) {
-					$.each(data, function() {
+		var favsLoad = function () {
+			$.get('/bookmarks', function (data) {
+				if (data.length != 0) {
+					$.each(data, function () {
 						$('ul#favs').append('<li><a href="' + this.url + '">'
 							+ this.name + '</a></li>');
 					});
@@ -136,20 +135,20 @@ var map;
 			});
 		};
 
-		var fracLoad = function() {
+		var fracLoad = function () {
 			var fracType = location.hash.split('?')[0];
-			if(fracType.length != 0) {
+			if (fracType.length != 0) {
 				$(fracType).click();
 			} else {
 				favsLoad();
 			}
 		};
 		fracLoad();
-		$(window).bind('hashchange', function() {
-			if(-1 != location.hash.indexOf('?')) {
+		$(window).bind('hashchange', function () {
+			if (-1 != location.hash.indexOf('?')) {
 				// Only reload if we're at a url that has a parameters
 				fracLoad();
 			}
 		});
 	})
-}( window.jQuery );
+}(window.jQuery);

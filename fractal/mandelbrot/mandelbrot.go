@@ -64,6 +64,10 @@ func (m *Mandelbrot) At(x, y int) color.Color {
 }
 
 func (m *Mandelbrot) ColorIndexAt(x, y int) uint8 {
+	if x == 0 || y == 0 {
+		return 0
+	}
+
 	r, i := m.Transform(image.Pt(x, y))
 
 	return m.ComputeMembership(r, i)

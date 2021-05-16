@@ -1,141 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Fractal Server</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="viewport" content="width=device-width, user-scalable=no,
+
+<head>
+  <meta charset="utf-8">
+  <title>Fractal Server</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
     initial-scale=1.0, maximum-scale=1.0">
 
-    <!-- Le styles -->
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
-    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+  <!-- Le styles -->
+  <link href="/static/css/bootstrap.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 60px;
+      /* 60px to make the container go all the way to the bottom of the topbar */
+    }
+  </style>
+  <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
+  <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="/static/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/static/ico/apple-touch-icon-57-precomposed.png">
-  </head>
+  <!-- Le fav and touch icons -->
+  <link rel="shortcut icon" href="/static/ico/favicon.ico">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/ico/apple-touch-icon-114-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/ico/apple-touch-icon-72-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="/static/ico/apple-touch-icon-57-precomposed.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+</head>
 
-  <body style="background-repeat:no-repeat;background-attachment:fixed;background-position:center;">
+<body style="background-repeat:no-repeat;background-attachment:fixed;background-position:center;">
 
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href="/">Fractal Server</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              {{range $k := .}}
-              <li><a id="{{$k}}" href="#{{$k}}">{{$k}}</a></li>
-              {{end}}
-              <!-- <li><a id="solid" href="/solid">Solid</a></li>-->
-              <!-- <li><a href="#contact">Contact</a></li>-->
-            </ul>
-          </div><!--/.nav-collapse -->
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/">Fractal Server</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            {{range $k := .}}
+            <li><a id="{{$k}}" href="#{{$k}}">{{$k}}</a></li>
+            {{end}}
+            <!-- <li><a id="solid" href="/solid">Solid</a></li>-->
+            <!-- <li><a href="#contact">Contact</a></li>-->
+          </ul>
         </div>
+        <!--/.nav-collapse -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="masthead">
+      <h1>Draw some fractals</h1>
+      <ul>
+        <li> <span class="hidden-phone">Choose a fractal type from the
+            nav bar at the top of the window</span>
+          <span class="visible-phone">Choose a fractal type by clicking
+            a button below</span></li>
+        <li>Navigate around like you would Google Maps (tweak the
+          numbers in the lower right corner if you want)</li>
+        <li><em>Enjoy</em></li>
+      </ul>
+    </div>
+    <ul id="mobile-jump" class="visible-phone nav nav-pills nav-stacked">
+      {{range $k := .}}
+      <li><a class="btn btn-primary btn-large" id="{{$k}}" href="#{{$k}}">{{$k}}</a>
+      </li>
+      {{end}}
+    </ul>
+    <div id="favs-container" style="display:none">
+      <h2>Favorite fractals people have saved</h2>
+      <ul id="favs">
+      </ul>
+    </div>
+    <div id="maps-outer" style="position:fixed;left:0;top:0;z-index:-10">
+      <div id="maps" style="width:100%;height:100%"></div>
+    </div>
+    <div id="config" class="alert alert-info form-horizontal"
+      style="display:none;position:fixed;bottom:16px;right:16px">
+      <div id="config-content"></div>
+      <button id="hide" class="btn btn-mini btn-primary">Hide</button>
+      <button id="share" class="btn btn-mini btn-inverse">Share</button>
+    </div>
+    <img id="gear" style="position:fixed;bottom:16px;left:50%;display:none"
+      src="/static/img/glyphicons_019_cogwheel.png">
+
+    <div id="share-modal" class="modal hide">
+      <div class="modal-header">
+        <button class="close" data-dismiss="modal">&times;</button>
+        <h3>Use the following link to share</h3>
+      </div>
+      <div class="modal-body">
+        <h4>URL</h4>
+        <p id="share-url"><a href="#"></a></p>
+
+        <hr>
+
+        <h4>Save this fractal to the homepage</h4>
+        <form action="/bookmarks/add">
+          <label for="name">Name:</label>
+          <input name="name" id="name" type="text">
+          <input name="url" id="url" type="hidden">
+          <div>
+            <button id="save" class="btn btn-inverse" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
       </div>
     </div>
 
-    <div class="container">
-        <div id="masthead">
-            <h1>Draw some fractals</h1>
-            <ul>
-                <li> <span class="hidden-phone">Choose a fractal type from the
-                    nav bar at the top of the window</span>
-                <span class="visible-phone">Choose a fractal type by clicking
-                    a button below</span></li>
-                <li>Navigate around like you would Google Maps (tweak the
-                numbers in the lower right corner if you want)</li>
-                <li><em>Enjoy</em></li>
-            </ul>
-        </div>
-        <ul id="mobile-jump" class="visible-phone nav nav-pills nav-stacked">
-            {{range $k := .}}
-            <li><a class="btn btn-primary btn-large"
-                id="{{$k}}" href="#{{$k}}">{{$k}}</a>
-            </li>
-            {{end}}
-        </ul>
-        <div id="favs-container" style="display:none">
-            <h2>Favorite fractals people have saved</h2>
-            <ul id="favs">
-            </ul>
-        </div>
-        <div id="maps-outer" style="position:fixed;left:0;top:0;z-index:-10">
-            <div id="maps" style="width:100%;height:100%"></div>
-        </div>
-        <div id="config" class="alert alert-info form-horizontal"
-            style="display:none;position:fixed;bottom:16px;right:16px">
-            <div id="config-content"></div>
-            <button id="hide" class="btn btn-mini btn-primary">Hide</button>
-            <button id="share" class="btn btn-mini btn-inverse">Share</button>
-        </div>
-        <img id="gear" style="position:fixed;bottom:16px;left:50%;display:none"
-            src="/static/img/glyphicons_019_cogwheel.png">
+  </div> <!-- /container -->
+  </div>
 
-    <div id="share-modal" class="modal hide">
-        <div class="modal-header">
-            <button class="close" data-dismiss="modal">&times;</button>
-            <h3>Use the following link to share</h3>
-        </div>
-        <div class="modal-body">
-            <h4>URL</h4>
-            <p id="share-url"><a href="#"></a></p>
-
-            <hr>
-
-            <h4>Save this fractal to the homepage</h4>
-            <form action="/bookmarks/add">
-                <label for="name">Name:</label>
-                <input name="name" id="name" type="text">
-                <input name="url" id="url" type="hidden">
-                <div>
-                <button id="save" class="btn btn-inverse" type="submit">Save</button>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="btn" data-dismiss="modal">Close</a>
-        </div>
-    </div>
-
-    </div> <!-- /container -->
-</div>
-
-    <!-- Le javascript
+  <!-- Le javascript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/jquery.js"></script>
-    <script src="/static/js/bootstrap.js"></script>
-    <script src="/static/js/fracserv.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDu6MUxgDrKnBb4ZZZdaM5jkgS2ce29awQ"></script>
-    <script src="/static/js/maps.js"></script>
-    <!-- TODO wrap this in debug tag -->
-    <script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-31294578-1']);
-        _gaq.push(['_trackPageview']);
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/static/js/jquery.js"></script>
+  <script src="/static/js/bootstrap.js"></script>
+  <script src="/static/js/fracserv.js"></script>
+  <script src="/static/js/maps.js"></script>
+  <!-- TODO wrap this in debug tag -->
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31294578-1']);
+    _gaq.push(['_trackPageview']);
 
-        (function() {
-          var ga = document.createElement('script'); ga.type =
-      'text/javascript'; ga.async = true;
-          ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
-      'http://www') + '.google-analytics.com/ga.js';
-          var s = document.getElementsByTagName('script')[0];
+    (function () {
+      var ga = document.createElement('script'); ga.type =
+        'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
+        'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(ga, s);
-        })();
-    </script>
-  </body>
+    })();
+  </script>
+</body>
+
 </html>
